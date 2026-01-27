@@ -1,145 +1,308 @@
 <!DOCTYPE html>
-<html lang="es">
+<html class="dark" lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Fuel Dashboard v2.2</title>
-    <link rel="manifest" href="manifest.json">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="theme-color" content="#0d1117">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>GasLog - Control de Combustible</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;800&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <link rel="stylesheet" href="style.css">
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#19e65e",
+                        "background-dark": "#112116",
+                        "card-dark": "#1c2a21",
+                        "border-dark": "#2f3e33"
+                    },
+                    fontFamily: { "display": ["Manrope", "sans-serif"] }
+                },
+            },
+        }
+    </script>
+    <style>
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        body { min-height: 100dvh; }
+        .page { display: none; }
+        .page.active { display: flex; }
+    </style>
 </head>
-<body>
+<body class="bg-background-dark font-display text-white antialiased">
 
-    <div class="app-container">
-        <header>
-            <h1>Fuel Dashboard <span class="version-tag">v2.2 Beta</span></h1>
-            <i class="fas fa-cog" id="settings-btn" style="cursor: pointer;"></i>
-        </header>
+    <div class="max-w-md mx-auto min-h-screen flex flex-col relative shadow-2xl bg-background-dark">
+        
+        <main id="page-dashboard" class="page active flex-col gap-6 p-4 pb-32 w-full">
+            <header class="flex justify-between items-center py-4">
+                <h1 class="text-xl font-bold">Fuel Dashboard</h1>
+                <button onclick="exportData()" class="p-2 bg-white/5 rounded-full"><span class="material-symbols-outlined">download</span></button>
+            </header>
 
-        <div id="view-dashboard" class="view-section">
-            <div class="filter-container">
-                <div class="custom-dropdown">
-                    <div class="dropdown-trigger" id="dropdown-trigger">
-                        <span>Todo el tiempo</span>
-                        <i class="fas fa-chevron-down"></i>
+            <section class="flex flex-col items-center py-4">
+                <div class="relative w-48 h-48 flex items-center justify-center">
+                    <svg class="transform -rotate-90 w-full h-full" viewBox="0 0 36 36">
+                        <path class="stroke-[#2A3830] stroke-[3px] fill-none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"></path>
+                        <path id="dash-efficiency-arc" class="stroke-primary stroke-[3px] fill-none" stroke-dasharray="0, 100" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"></path>
+                    </svg>
+                    <div class="absolute inset-0 flex flex-col items-center justify-center">
+                        <span id="dash-avg-eff" class="text-4xl font-extrabold">0.0</span>
+                        <span class="text-xs text-gray-400 uppercase">km/l</span>
                     </div>
-                    <div class="dropdown-options hidden" id="dropdown-options">
-                        <div class="dropdown-item selected" data-value="all">Todo el tiempo</div>
-                        <div class="dropdown-item" data-value="1">Último Mes</div>
-                        <div class="dropdown-item" data-value="12">Último Año</div>
-                    </div>
+                </div>
+            </section>
+
+            <div class="grid grid-cols-2 gap-4">
+                <div class="bg-card-dark p-4 rounded-2xl border border-white/5">
+                    <p class="text-gray-400 text-xs font-bold uppercase">Gasto Total</p>
+                    <p id="dash-total-spent" class="text-2xl font-bold mt-1">$0.00</p>
+                </div>
+                <div class="bg-card-dark p-4 rounded-2xl border border-white/5">
+                    <p class="text-gray-400 text-xs font-bold uppercase">Último Odóm.</p>
+                    <p id="dash-last-odo" class="text-2xl font-bold mt-1">0 km</p>
                 </div>
             </div>
 
-            <section class="main-stats">
-                <div class="circle-chart-container">
-                    <svg class="progress-ring" width="200" height="200">
-                        <circle class="progress-ring__circle-bg" stroke="#2d3b33" stroke-width="15" fill="transparent" r="85" cx="100" cy="100"/>
-                        <circle class="progress-ring__circle" id="efficiency-circle" stroke="#22c55e" stroke-width="15" stroke-linecap="round" fill="transparent" r="85" cx="100" cy="100"/>
-                    </svg>
-                    <div class="circle-inner">
-                        <h2 id="average-display">--</h2>
-                        <span>KM/L</span>
+            <section>
+                <h3 class="font-bold mb-3">Actividad Reciente</h3>
+                <div id="recent-list" class="flex flex-col gap-3">
+                    </div>
+            </section>
+        </main>
+
+        <main id="page-add" class="page flex-col gap-6 p-5 pb-32 w-full">
+            <header class="flex justify-between items-center py-4 border-b border-border-dark">
+                <button onclick="navigate('dashboard')" class="text-primary font-medium">Cancelar</button>
+                <h1 class="text-lg font-bold">Nueva Carga</h1>
+                <div class="w-10"></div>
+            </header>
+            
+            <div class="flex flex-col gap-4 mt-4">
+                <div>
+                    <label class="text-xs font-bold text-gray-400 uppercase">Odómetro Actual (km)</label>
+                    <input id="in-odo" type="number" class="w-full bg-card-dark border-none rounded-xl p-4 text-2xl font-bold focus:ring-2 focus:ring-primary" placeholder="0">
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="text-xs font-bold text-gray-400 uppercase">Litros</label>
+                        <input id="in-liters" type="number" step="0.01" class="w-full bg-card-dark border-none rounded-xl p-4 text-xl font-bold focus:ring-2 focus:ring-primary" placeholder="0.0">
+                    </div>
+                    <div>
+                        <label class="text-xs font-bold text-gray-400 uppercase">Costo Total ($)</label>
+                        <input id="in-cost" type="number" step="0.01" class="w-full bg-card-dark border-none rounded-xl p-4 text-xl font-bold focus:ring-2 focus:ring-primary" placeholder="0.00">
                     </div>
                 </div>
-                <h3>Eficiencia Promedio</h3>
-            </section>
-
-            <section class="summary-cards">
-                <div class="card">
-                    <div class="card-icon orange"><i class="fas fa-wallet"></i></div>
-                    <p class="label">Total Gastado</p>
-                    <h3 class="value" id="total-spent">$0.00</h3>
+                <div>
+                    <label class="text-xs font-bold text-gray-400 uppercase">Gasolinera / Ubicación</label>
+                    <input id="in-loc" type="text" class="w-full bg-card-dark border-none rounded-xl p-4 text-lg font-medium focus:ring-2 focus:ring-primary" placeholder="Ej. Shell Principal">
                 </div>
-                <div class="card">
-                    <div class="card-icon blue"><i class="fas fa-gas-pump"></i></div>
-                    <p class="label">Última Carga</p>
-                    <h3 class="value" id="last-efficiency">--</h3>
-                </div>
-            </section>
+                <button onclick="saveRefill()" class="w-full bg-primary text-black font-bold py-4 rounded-xl shadow-lg shadow-primary/20 mt-4 flex justify-center items-center gap-2">
+                    <span class="material-symbols-outlined">check</span> Guardar Registro
+                </button>
+            </div>
+        </main>
 
-            <div class="chart-card">
+        <main id="page-history" class="page flex-col gap-4 p-4 pb-32 w-full">
+            <h1 class="text-xl font-bold py-4">Historial Completo</h1>
+            <div id="full-history-list" class="flex flex-col gap-3"></div>
+        </main>
+
+        <main id="page-reports" class="page flex-col gap-6 p-4 pb-32 w-full">
+            <h1 class="text-xl font-bold py-4">Estadísticas</h1>
+            <div class="bg-card-dark p-6 rounded-2xl border border-white/5">
+                <p class="text-gray-400 text-sm uppercase font-bold mb-4">Tendencia de Eficiencia</p>
                 <canvas id="efficiencyChart"></canvas>
             </div>
+            <div class="p-4 bg-white/5 rounded-xl border border-white/10">
+                <p class="text-xs font-bold text-gray-400 uppercase">Mantenimiento</p>
+                <p class="text-sm mt-1 text-primary">Próximo servicio sugerido en 5,000 km</p>
+            </div>
+            <div class="flex gap-2">
+                <input type="file" id="importFile" class="hidden" onchange="importData(event)">
+                <button onclick="document.getElementById('importFile').click()" class="flex-1 bg-white/5 py-3 rounded-lg text-xs font-bold uppercase">Restaurar JSON</button>
+                <button onclick="clearAllData()" class="flex-1 bg-red-500/10 text-red-500 py-3 rounded-lg text-xs font-bold uppercase">Borrar Todo</button>
+            </div>
+        </main>
+
+        <div id="fab" class="fixed bottom-24 right-6 z-40">
+            <button onclick="navigate('add')" class="flex items-center gap-2 bg-primary text-black font-bold py-4 px-6 rounded-full shadow-lg shadow-primary/30 transform transition hover:scale-105">
+                <span class="material-symbols-outlined">add</span>
+                <span>Cargar Gas</span>
+            </button>
         </div>
 
-        <div id="view-history" class="view-section hidden-view">
-            <div class="section-header"><h3>Historial</h3></div>
-            <div id="activity-list"></div>
-        </div>
-
-        <div id="view-vehicle" class="view-section hidden-view">
-            <div class="section-header"><h3>Vehículo</h3></div>
-            <div class="card" style="text-align:center;">
-                <i class="fas fa-tachometer-alt" style="font-size:2rem; color:var(--primary-green);"></i>
-                <p class="label">Odómetro</p>
-                <h2 id="vehicle-odometer">--</h2>
-                <span class="unit">km</span>
-            </div>
-            <div class="card" id="maintenance-card" style="margin-top:15px;">
-                <p class="label">Próximo Servicio</p>
-                <h3 id="next-service-km">--</h3>
-                <div class="progress-bar-bg"><div id="maint-progress-fill" class="progress-bar-fill"></div></div>
-            </div>
-        </div>
-
-        <div id="add-screen" class="screen hidden">
-            <div class="screen-header">
-                <button id="cancel-btn" class="text-btn">Cancelar</button>
-                <h2>Nuevo Registro</h2>
-                <div style="width: 50px;"></div>
-            </div>
-            <div class="input-group"><label>Fecha</label><input type="date" id="date-input"></div>
-            <div class="mode-switch-container">
-                <span class="switch-label">Modo Odómetro Total</span>
-                <label class="switch"><input type="checkbox" id="mode-toggle"><span class="slider round"></span></label>
-            </div>
-            <div class="input-group" id="input-trip-group">
-                <label>Distancia (Trip)</label>
-                <input type="number" id="trip-input" class="big-input" placeholder="0">
-                <p class="sub-label">Anterior: <span id="prev-odometer-display">--</span> km</p>
-            </div>
-            <div class="input-group hidden-input" id="input-odometer-group">
-                <label>Odómetro Total</label>
-                <input type="number" id="odometer-input" class="big-input" placeholder="0">
-            </div>
-            <div class="row">
-                <div class="input-group half"><label>Litros</label><input type="number" id="liters-input" step="0.1"></div>
-                <div class="input-group half"><label>Precio</label><input type="number" id="price-input" step="0.1"></div>
-            </div>
-            <div class="input-group"><label>Gasolinera</label><input type="text" id="station-input" placeholder="Ej. Shell"></div>
-            <div class="input-group"><label>Notas</label><textarea id="notes-input" rows="2"></textarea></div>
-            <button id="save-btn" class="save-btn">Guardar</button>
-        </div>
-
-        <div id="settings-screen" class="screen hidden">
-            <div class="screen-header">
-                <button id="close-settings-btn" class="text-btn">Cerrar</button>
-                <h2>Ajustes</h2>
-                <div style="width: 50px;"></div>
-            </div>
-            <div class="input-group"><label>Odómetro Inicial</label><input type="number" id="set-init-odo"></div>
-            <div class="input-group"><label>Último Servicio</label><input type="number" id="set-last-maint"></div>
-            <div class="input-group"><label>Intervalo</label><input type="number" id="set-maint-int"></div>
-            <div style="display:flex; gap:10px; margin-top:20px;">
-                <button id="export-btn" class="backup-btn">Exportar</button>
-                <button id="import-btn" class="backup-btn">Importar</button>
-                <input type="file" id="file-import" style="display:none">
-            </div>
-            <button id="reset-app-btn" class="danger-btn">Borrar Todo</button>
-        </div>
-
-        <button class="fab-btn"><i class="fas fa-plus"></i> Nuevo Registro</button>
-        <nav class="bottom-nav">
-            <a href="#" class="nav-item active" data-target="view-dashboard"><i class="fas fa-th-large"></i><span>Inicio</span></a>
-            <a href="#" class="nav-item" data-target="view-history"><i class="fas fa-history"></i><span>Historial</span></a>
-            <a href="#" class="nav-item" data-target="view-vehicle"><i class="fas fa-car"></i><span>Vehículo</span></a>
+        <nav class="fixed bottom-0 w-full max-w-md bg-[#151f19] border-t border-white/5 flex justify-around items-center h-20 pb-4 z-50">
+            <button onclick="navigate('dashboard')" class="nav-btn flex flex-col items-center text-primary" data-page="dashboard">
+                <span class="material-symbols-outlined">dashboard</span>
+                <span class="text-[10px] font-bold">Dashboard</span>
+            </button>
+            <button onclick="navigate('history')" class="nav-btn flex flex-col items-center text-gray-500" data-page="history">
+                <span class="material-symbols-outlined">history</span>
+                <span class="text-[10px] font-medium">Historial</span>
+            </button>
+            <button onclick="navigate('reports')" class="nav-btn flex flex-col items-center text-gray-500" data-page="reports">
+                <span class="material-symbols-outlined">insights</span>
+                <span class="text-[10px] font-medium">Reportes</span>
+            </button>
         </nav>
     </div>
-    <script src="script.js"></script>
+
+    <script>
+        let refills = JSON.parse(localStorage.getItem('gas_log')) || [];
+        let chartInstance = null;
+
+        function navigate(pageId) {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.getElementById(`page-${pageId}`).classList.add('active');
+            
+            // Actualizar botones nav
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.classList.toggle('text-primary', btn.dataset.page === pageId);
+                btn.classList.toggle('text-gray-500', btn.dataset.page !== pageId);
+            });
+
+            // Ocultar FAB en página de añadir
+            document.getElementById('fab').style.display = (pageId === 'add') ? 'none' : 'block';
+
+            if(pageId === 'dashboard') updateDashboard();
+            if(pageId === 'history') updateHistory();
+            if(pageId === 'reports') updateReports();
+        }
+
+        function saveRefill() {
+            const odo = parseFloat(document.getElementById('in-odo').value);
+            const liters = parseFloat(document.getElementById('in-liters').value);
+            const cost = parseFloat(document.getElementById('in-cost').value);
+            const loc = document.getElementById('in-loc').value || "Estación Desconocida";
+
+            if(!odo || !liters || !cost) return alert("Por favor llena los campos básicos");
+
+            let efficiency = 0;
+            if(refills.length > 0) {
+                const lastOdo = refills[0].odo;
+                const distance = odo - lastOdo;
+                efficiency = distance > 0 ? (distance / liters).toFixed(2) : 0;
+            }
+
+            const newEntry = {
+                id: Date.now(),
+                date: new Date().toLocaleString(),
+                odo, liters, cost, loc,
+                efficiency: parseFloat(efficiency)
+            };
+
+            refills.unshift(newEntry);
+            localStorage.setItem('gas_log', JSON.stringify(refills));
+            
+            // Limpiar y volver
+            document.getElementById('in-odo').value = odo;
+            document.getElementById('in-liters').value = '';
+            document.getElementById('in-cost').value = '';
+            navigate('dashboard');
+        }
+
+        function updateDashboard() {
+            const totalSpent = refills.reduce((acc, curr) => acc + curr.cost, 0);
+            const avgEff = refills.filter(r => r.efficiency > 0).reduce((acc, curr, _, arr) => acc + curr.efficiency / arr.length, 0);
+            
+            document.getElementById('dash-total-spent').innerText = `$${totalSpent.toFixed(2)}`;
+            document.getElementById('dash-avg-eff').innerText = avgEff.toFixed(1);
+            document.getElementById('dash-last-odo').innerText = refills.length > 0 ? `${refills[0].odo} km` : '0 km';
+            
+            // Animación arco (max 20 km/l para el 100%)
+            const percent = Math.min((avgEff / 20) * 100, 100);
+            document.getElementById('dash-efficiency-arc').setAttribute('stroke-dasharray', `${percent}, 100`);
+
+            const list = document.getElementById('recent-list');
+            list.innerHTML = refills.slice(0, 3).map(r => `
+                <div class="bg-card-dark p-4 rounded-xl border border-white/5 flex items-center gap-4">
+                    <div class="size-10 bg-primary/10 text-primary flex items-center justify-center rounded-lg"><span class="material-symbols-outlined">local_gas_station</span></div>
+                    <div class="flex-1">
+                        <div class="flex justify-between font-bold"><span>${r.loc}</span><span>$${r.cost}</span></div>
+                        <div class="flex justify-between text-xs text-gray-500"><span>${r.liters}L • ${r.efficiency} km/l</span><span>${r.date.split(',')[0]}</span></div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function updateHistory() {
+            const container = document.getElementById('full-history-list');
+            container.innerHTML = refills.map(r => `
+                <div class="bg-card-dark p-4 rounded-xl border border-white/5">
+                    <div class="flex justify-between items-start mb-2">
+                        <div><p class="font-bold">${r.loc}</p><p class="text-xs text-gray-500">${r.date}</p></div>
+                        <p class="text-lg font-bold text-primary">$${r.cost}</p>
+                    </div>
+                    <div class="flex justify-between text-sm border-t border-white/5 pt-2">
+                        <span>${r.odo} km</span>
+                        <span class="font-bold">${r.efficiency} km/l</span>
+                        <span class="text-gray-500">$${(r.cost/r.liters).toFixed(2)}/L</span>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function updateReports() {
+            const ctx = document.getElementById('efficiencyChart').getContext('2d');
+            const data = [...refills].reverse().filter(r => r.efficiency > 0);
+            
+            if(chartInstance) chartInstance.destroy();
+            
+            chartInstance = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: data.map(r => r.date.split(',')[0]),
+                    datasets: [{
+                        label: 'km/l',
+                        data: data.map(r => r.efficiency),
+                        borderColor: '#19e65e',
+                        backgroundColor: 'rgba(25, 230, 94, 0.1)',
+                        fill: true,
+                        tension: 0.4
+                    }]
+                },
+                options: { 
+                    plugins: { legend: { display: false } },
+                    scales: { 
+                        y: { grid: { color: 'rgba(255,255,255,0.05)' } },
+                        x: { grid: { display: false } }
+                    }
+                }
+            });
+        }
+
+        function exportData() {
+            const blob = new Blob([JSON.stringify(refills)], {type: 'application/json'});
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `gaslog_respaldo_${new Date().toLocaleDateString()}.json`;
+            a.click();
+        }
+
+        function importData(event) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                refills = JSON.parse(e.target.result);
+                localStorage.setItem('gas_log', JSON.stringify(refills));
+                updateDashboard();
+                alert("Datos restaurados con éxito");
+            };
+            reader.readAsText(event.target.files[0]);
+        }
+
+        function clearAllData() {
+            if(confirm("¿Estás seguro? Se borrarán todos tus registros.")) {
+                localStorage.clear();
+                refills = [];
+                updateDashboard();
+            }
+        }
+
+        // Inicio
+        updateDashboard();
+    </script>
 </body>
 </html>
