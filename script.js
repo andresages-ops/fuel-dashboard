@@ -1,91 +1,138 @@
+// --- ELEMENTOS ---
 const addBtn = document.querySelector('.fab-btn');
 const addScreen = document.getElementById('add-screen');
-const cancelBtn = document.getElementById('cancel-btn');
-const saveBtn = document.getElementById('save-btn');
-const deleteBtn = document.getElementById('delete-btn');
-const settingsBtn = document.getElementById('settings-btn');
 const settingsScreen = document.getElementById('settings-screen');
-const closeSettingsBtn = document.getElementById('close-settings-btn');
-const settingStartKm = document.getElementById('setting-start-km');
+const navItems = document.querySelectorAll('.nav-item');
+const viewSections = document.querySelectorAll('.view-section');
 
 let refills = JSON.parse(localStorage.getItem('refills')) || [];
 let vehicleConfig = JSON.parse(localStorage.getItem('vehicleConfig')) || { lastService: 0, interval: 10000, startKM: 0 };
-let currentFilterValue = "all";
-let myChart;
+let selectedFuel = "Regular";
+let chartInstance = null;
 
-document.addEventListener('DOMContentLoaded', () => {
-    if(settingStartKm) settingStartKm.value = vehicleConfig.startKM || '';
-    if(document.getElementById('setting-last-service')) document.getElementById('setting-last-service').value = vehicleConfig.lastService || '';
-    if(document.getElementById('setting-interval')) document.getElementById('setting-interval').value = vehicleConfig.interval;
-    
-    initChart();
-    renderApp();
+// --- NAVEGACIÓN ---
+navItems.forEach(item => {
+    item.addEventListener('click', (e) => {
+        e.preventDefault();
+        navItems.forEach(nav => nav.classList.remove('active'));
+        item.classList.add('active');
+        viewSections.forEach(v => v.classList.add('hidden-view'));
+        document.getElementById(item.dataset.target).classList.remove('hidden-view');
+        if(item.dataset.target === 'view-dashboard') renderApp();
+    });
 });
 
+// --- SWITCH GASOLINA ---
+function switchFuel(type, index) {
+    selectedFuel = type;
+    const slider = document.getElementById('fuel-slider');
+    const buttons = document.querySelectorAll('.seg-btn');
+    slider.style.transform = `translateX(${index * 100}%)`;
+    slider.style.backgroundColor = type === "Regular" ? "var(--primary-green)" : "var(--premium-red)";
+    buttons.forEach(btn => btn.classList.remove('active'));
+    buttons[index].classList.add('active');
+}
+
+// --- CÁLCULOS ---
 function recalculateAll() {
     refills.sort((a, b) => a.odometer - b.odometer);
     const startKM = parseFloat(vehicleConfig.startKM) || 0;
 
-    for (let i = 0; i < refills.length; i++) {
-        const current = refills[i];
-        const previousKM = (i === 0) ? startKM : refills[i - 1].odometer;
-        
-        if (previousKM > 0) {
-            const distance = current.odometer - previousKM;
-            current.distanceTraveled = distance > 0 ? distance : 0;
-            current.efficiencyKmL = (distance > 0 && current.liters > 0) ? (distance / current.liters).toFixed(1) : "0.0";
+    refills.forEach((reg, i) => {
+        const prevKM = (i === 0) ? startKM : refills[i - 1].odometer;
+        if (prevKM > 0) {
+            reg.distanceTraveled = reg.odometer - prevKM;
+            reg.efficiencyKmL = reg.distanceTraveled > 0 ? (reg.distanceTraveled / reg.liters).toFixed(1) : "0.0";
         } else {
-            current.distanceTraveled = 0;
-            current.efficiencyKmL = "0.0";
+            reg.distanceTraveled = 0;
+            reg.efficiencyKmL = "0.0";
         }
-    }
+    });
 }
 
 function renderApp() {
     recalculateAll();
     const list = document.getElementById('activity-list');
-    if(!list) return;
     list.innerHTML = '';
-    
-    const filtered = getFilteredRefills();
-    const viewList = [...filtered].reverse();
 
-    if(viewList.length > 0) {
-        document.getElementById('total-spent').innerText = `$${filtered.reduce((s, r) => s + r.price, 0).toFixed(2)}`;
-        const valid = filtered.filter(r => parseFloat(r.efficiencyKmL) > 0);
-        if(valid.length > 0) {
+    if (refills.length > 0) {
+        document.getElementById('total-spent').innerText = `$${refills.reduce((s, r) => s + r.price, 0).toFixed(2)}`;
+        const valid = refills.filter(r => parseFloat(r.efficiencyKmL) > 0);
+        if (valid.length > 0) {
             const avg = (valid.reduce((s, r) => s + parseFloat(r.efficiencyKmL), 0) / valid.length).toFixed(1);
             document.getElementById('average-display').innerText = avg;
-            setProgress((avg / 20) * 100);
+            updateCircle(avg);
         }
-        
-        const latestOdo = Math.max(...refills.map(r => r.odometer));
-        document.getElementById('vehicle-odometer').innerText = latestOdo.toLocaleString();
+        document.getElementById('vehicle-odometer').innerText = refills[refills.length - 1].odometer.toLocaleString();
     }
-    
-    viewList.forEach(r => {
-        const item = document.createElement('div');
-        item.className = 'activity-item';
-        item.innerHTML = `
+
+    refills.slice().reverse().forEach(r => {
+        const div = document.createElement('div');
+        div.className = 'activity-item';
+        div.innerHTML = `
             <div class="icon-box"><i class="fas fa-gas-pump"></i></div>
-            <div class="details"><h4>${r.station}</h4><p>${r.dateDisplay} • ${r.odometer} km</p></div>
+            <div class="details"><h4>${r.station}</h4><p>${r.rawDate} • ${r.tipo}</p></div>
             <div class="cost"><h4>${r.efficiencyKmL} <small>km/l</small></h4><p>+${r.distanceTraveled} km</p></div>
         `;
-        list.appendChild(item);
+        list.appendChild(div);
     });
-    updateChartData(filtered);
+    updateChart();
 }
 
-// Lógica de Modales y botones (resumida para ahorrar espacio pero funcional)
-if(settingsBtn) settingsBtn.onclick = () => settingsScreen.classList.remove('hidden');
-if(closeSettingsBtn) closeSettingsBtn.onclick = () => {
-    vehicleConfig.startKM = parseFloat(settingStartKm.value) || 0;
+function updateCircle(avg) {
+    const circle = document.querySelector('.progress-ring__circle');
+    const radius = circle.r.baseVal.value;
+    const circumference = radius * 2 * Math.PI;
+    circle.style.strokeDasharray = `${circumference} ${circumference}`;
+    const percent = Math.min((avg / 20) * 100, 100);
+    circle.style.strokeDashoffset = circumference - (percent / 100) * circumference;
+}
+
+// --- MODALES ---
+document.getElementById('settings-btn').onclick = () => settingsScreen.classList.remove('hidden');
+document.getElementById('close-settings-btn').onclick = () => {
+    vehicleConfig.startKM = parseFloat(document.getElementById('setting-start-km').value) || 0;
     vehicleConfig.lastService = parseFloat(document.getElementById('setting-last-service').value) || 0;
     vehicleConfig.interval = parseFloat(document.getElementById('setting-interval').value) || 10000;
     localStorage.setItem('vehicleConfig', JSON.stringify(vehicleConfig));
-    renderApp();
     settingsScreen.classList.add('hidden');
+    renderApp();
 };
 
-// ... Resto de lógica de navegación y guardado de la v2.1 ...
-// (Asegúrate de mantener las funciones initChart, updateChartData y los event listeners del modal)
+addBtn.onclick = () => {
+    document.getElementById('date-input').value = new Date().toISOString().split('T')[0];
+    addScreen.classList.remove('hidden');
+};
+
+document.getElementById('save-btn').onclick = () => {
+    const l = parseFloat(document.getElementById('liters').value);
+    const p = parseFloat(document.getElementById('price').value);
+    const km = parseInt(document.getElementById('odometer').value);
+    if (!l || !p || !km) return alert("Completa los datos");
+
+    refills.push({
+        id: Date.now(), rawDate: document.getElementById('date-input').value,
+        liters: l, price: p, odometer: km,
+        station: document.getElementById('station').value || "Gasolinera",
+        tipo: selectedFuel, notes: document.getElementById('notes').value
+    });
+    localStorage.setItem('refills', JSON.stringify(refills));
+    addScreen.classList.add('hidden');
+    renderApp();
+};
+
+function updateChart() {
+    const ctx = document.getElementById('efficiencyChart');
+    if (chartInstance) chartInstance.destroy();
+    const valid = refills.filter(r => parseFloat(r.efficiencyKmL) > 0);
+    chartInstance = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: valid.map(r => r.rawDate),
+            datasets: [{ data: valid.map(r => r.efficiencyKmL), borderColor: '#22c55e', tension: 0.4, fill: true, backgroundColor: 'rgba(34, 197, 94, 0.1)' }]
+        },
+        options: { responsive: true, plugins: { legend: { display: false } } }
+    });
+}
+
+window.onload = renderApp;
