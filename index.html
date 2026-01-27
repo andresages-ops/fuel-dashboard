@@ -65,6 +65,13 @@
                     <h2>Nueva Carga</h2>
                     <button id="cancel-btn" class="close-btn">&times;</button>
                 </header>
+
+                <div class="form-group">
+                    <div class="segmented-control">
+                        <button class="seg-btn active" data-type="Regular">Regular</button>
+                        <button class="seg-btn" data-type="Premium">Premium</button>
+                    </div>
+                </div>
                 
                 <div class="form-row">
                     <div class="form-group">
@@ -88,19 +95,25 @@
                 </div>
 
                 <div class="form-group">
-                    <label>Tipo de Gasolina</label>
-                    <div class="fuel-type-selector">
-                        <button class="type-btn active" data-type="Regular">Regular</button>
-                        <button class="type-btn" data-type="Premium">Premium</button>
-                    </div>
-                </div>
-
-                <div class="form-group">
-                    <label>Notas (Viaje, tráfico, etc.)</label>
-                    <textarea id="notes" placeholder="Ej. Rumbo a Chapala..."></textarea>
+                    <label>Notas</label>
+                    <textarea id="notes" placeholder="Ej. Tráfico pesado o carretera..."></textarea>
                 </div>
 
                 <button id="save-btn" class="save-full-btn">Guardar Registro</button>
+            </div>
+        </div>
+
+        <div id="detail-screen" class="add-modal hidden">
+            <div class="modal-content detail-content">
+                <header>
+                    <h2 id="detail-title">Detalle de Carga</h2>
+                    <button id="close-detail" class="close-btn">&times;</button>
+                </header>
+                <div id="detail-body">
+                    </div>
+                <button id="delete-btn" class="delete-btn">
+                    <i class="fas fa-trash"></i> Eliminar Registro
+                </button>
             </div>
         </div>
 
@@ -112,9 +125,6 @@
             <div class="chart-box">
                 <canvas id="efficiencyChart"></canvas>
             </div>
-            <p style="color: var(--text-gray); font-size: 0.8rem; margin-top: 15px; text-align: center;">
-                Tendencia de KM/L por fecha de carga
-            </p>
         </div>
 
         <nav class="bottom-nav">
