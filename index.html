@@ -3,14 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    
     <title>Fuel Dashboard</title>
-
     <link rel="manifest" href="manifest.json">
-    
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="FuelApp">
     <meta name="theme-color" content="#0d1117">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -19,14 +15,15 @@
 <body>
 
     <div class="app-container">
-        
         <header>
-            <h1>Fuel Dashboard</h1>
+            <div style="display: flex; align-items: baseline; gap: 10px;">
+                <h1>Fuel Dashboard</h1>
+                <span id="version-tag" style="font-size: 0.6rem; color: var(--primary-green); opacity: 0.7; border: 1px solid var(--primary-green); padding: 2px 5px; border-radius: 4px;">v2.1.1-beta</span>
+            </div>
             <i class="fas fa-cog" id="settings-btn" style="cursor: pointer;"></i>
         </header>
 
         <div id="view-dashboard" class="view-section">
-            
             <div class="filter-container">
                 <div class="custom-dropdown" id="custom-time-filter">
                     <div class="dropdown-trigger" id="dropdown-trigger">
@@ -61,14 +58,12 @@
             <section class="summary-cards">
                 <div class="card">
                     <div class="card-icon orange"><i class="fas fa-wallet"></i></div>
-                    <span class="trend down">↘</span>
                     <p class="label">Total Gastado</p>
                     <h3 class="value" id="total-spent">$0.00</h3>
-                    <p class="sub-label" id="period-label">Histórico</p>
+                    <p class="sub-label" id="period-label">Histórico Total</p>
                 </div>
                 <div class="card">
                     <div class="card-icon blue"><i class="fas fa-gas-pump"></i></div>
-                    <span class="trend up">↗</span>
                     <p class="label">Última Carga</p>
                     <h3 class="value" id="last-efficiency">--</h3>
                     <p class="sub-label">km/l eficiencia</p>
@@ -84,19 +79,13 @@
         </div>
 
         <div id="view-history" class="view-section hidden-view">
-            <div class="section-header">
-                <h3>Historial de Cargas</h3>
-            </div>
-            <div id="activity-list">
-                <p style="text-align:center; color:#666; padding:20px;">Cargando datos...</p>
-            </div>
+            <div class="section-header"><h3>Historial de Cargas</h3></div>
+            <div id="activity-list"></div>
             <div style="height: 100px;"></div>
         </div>
 
         <div id="view-vehicle" class="view-section hidden-view">
-            <div class="section-header">
-                <h3>Estado del Vehículo</h3>
-            </div>
+            <div class="section-header"><h3>Estado del Vehículo</h3></div>
             <div class="card" style="text-align:center; margin-bottom:20px; padding:30px;">
                 <i class="fas fa-tachometer-alt" style="font-size:2rem; color:var(--primary-green); margin-bottom:10px;"></i>
                 <p class="label">Kilometraje Actual</p>
@@ -108,104 +97,28 @@
                     <div>
                         <p class="label" style="color:var(--accent-orange);">Próximo Mantenimiento</p>
                         <h3 class="value" id="next-service">--</h3>
-                        <p class="sub-label" id="service-interval-label">Basado en tu configuración</p>
+                        <p class="sub-label" id="service-interval-label">Cargando...</p>
                     </div>
                     <div class="card-icon orange"><i class="fas fa-wrench"></i></div>
                 </div>
                 <div style="width:100%; background:#2d3b33; height:8px; border-radius:4px; margin-top:15px;">
                     <div id="service-progress" style="width: 0%; background:var(--accent-orange); height:100%; border-radius:4px;"></div>
                 </div>
-                <p style="text-align:center; font-size:0.8rem; color:var(--text-gray); margin-top:10px;">
-                    ¿No coincide? Ajustalo en Configuración (⚙️)
-                </p>
             </div>
         </div>
 
         <div id="view-reports" class="view-section hidden-view">
-            <div class="section-header">
-                <h3>Estadísticas Globales</h3>
-            </div>
+            <div class="section-header"><h3>Estadísticas Globales</h3></div>
             <div class="summary-cards">
                 <div class="card">
                     <p class="label">Costo por KM</p>
                     <h3 class="value" id="cost-per-km">--</h3>
-                    <p class="sub-label">Promedio histórico</p>
                 </div>
                 <div class="card">
                     <p class="label">Mejor Rendimiento</p>
                     <h3 class="value" id="best-efficiency" style="color:var(--primary-green);">--</h3>
-                    <p class="sub-label">km/l récord</p>
                 </div>
             </div>
-             <div class="card" style="margin-top:15px;">
-                <p class="label">Total Litros Consumidos</p>
-                <h3 class="value" id="total-liters">--</h3>
-                <span class="unit">Litros</span>
-            </div>
-        </div>
-
-        <div id="add-screen" class="screen hidden">
-            <div class="screen-header">
-                <button id="cancel-btn">Cancelar</button>
-                <h2 id="modal-title">Agregar Refill</h2>
-                <button id="delete-btn" style="color:#ef4444; background:none; border:none; font-size:1.2rem; display:none;">
-                    <i class="fas fa-trash-alt"></i>
-                </button>
-            </div>
-            <div class="input-group">
-                <label>FECHA</label>
-                <input type="date" id="date-input" style="color-scheme: dark;">
-            </div>
-            <div class="mode-switch-container">
-                <label class="switch-label">Usar Odómetro Total (Manual)</label>
-                <label class="switch">
-                    <input type="checkbox" id="mode-toggle">
-                    <span class="slider round"></span>
-                </label>
-            </div>
-            <div class="input-group" id="input-trip-group" style="border: 1px solid var(--primary-green);">
-                <label style="color:var(--primary-green);">DISTANCIA RECORRIDA (TRIP)</label>
-                <input type="number" id="trip-input" placeholder="Ej. 450" class="big-input" style="color:var(--primary-green);">
-                <span class="unit" style="color:var(--primary-green);">+km</span>
-                <p style="font-size:0.7rem; color:var(--text-gray); margin-top:5px;">
-                    Se sumará al anterior: <span id="prev-odometer-display">--</span> km
-                </p>
-            </div>
-            <div class="input-group hidden-input" id="input-odometer-group">
-                <label>ODÓMETRO TOTAL (TABLERO)</label>
-                <input type="number" id="odometer" placeholder="Ej. 125040" class="big-input">
-                <span class="unit">km</span>
-            </div>
-            <div class="row">
-                <div class="input-group half">
-                    <label>LITROS</label>
-                    <input type="number" id="liters" placeholder="0.0">
-                </div>
-                <div class="input-group half">
-                    <label>COSTO ($)</label>
-                    <input type="number" id="price" placeholder="0.00">
-                </div>
-            </div>
-            <div class="input-group">
-                <label>GASOLINERA</label>
-                <div class="icon-input" style="display:flex; align-items:center; gap:10px;">
-                    <i class="fas fa-map-marker-alt" style="color:var(--text-gray)"></i>
-                    <input type="text" id="station" placeholder="Ej. Shell">
-                </div>
-            </div>
-            <div class="input-group">
-                <label>NOTAS / COMENTARIOS (OPCIONAL)</label>
-                <textarea id="notes" rows="2" placeholder="Ej. Viaje en carretera, A/C encendido..."></textarea>
-            </div>
-            <div class="input-group">
-                <label>RANGO ESTIMADO (OPCIONAL)</label>
-                <div class="icon-input" style="display:flex; align-items:center; gap:10px;">
-                    <i class="fas fa-tachometer-alt" style="color:var(--text-gray)"></i>
-                    <input type="number" id="range" placeholder="Ej. 650">
-                </div>
-            </div>
-            <button id="save-btn" class="save-btn"><i class="fas fa-check"></i> Guardar</button>
-            <button id="cancel-bottom-btn" class="cancel-bottom-btn">Cancelar operación</button>
         </div>
 
         <div id="settings-screen" class="screen hidden">
@@ -215,41 +128,69 @@
                 <div style="width: 50px;"></div>
             </div>
             <div class="settings-menu">
-                <h4 style="color:var(--text-gray); margin-bottom:10px; margin-top:10px; text-transform:uppercase; font-size:0.8rem;">Mantenimiento del Vehículo</h4>
+                <h4 class="settings-title">Punto de Partida</h4>
+                <div class="card" style="margin-bottom:20px;">
+                    <div class="input-group" style="background:none; padding:0;">
+                        <label>Odómetro Inicial (Antes de registros)</label>
+                        <input type="number" id="setting-start-km" placeholder="Ej. 120000" style="background:var(--bg-dark); padding:10px; border-radius:8px; margin-top:5px;">
+                    </div>
+                </div>
+
+                <h4 class="settings-title">Mantenimiento</h4>
                 <div class="card" style="margin-bottom:20px;">
                     <div class="input-group" style="background:none; padding:0; margin-bottom:15px;">
                         <label>Último Servicio (Km)</label>
-                        <input type="number" id="setting-last-service" placeholder="Ej. 120000" style="background:var(--bg-dark); padding:10px; border-radius:8px; margin-top:5px;">
+                        <input type="number" id="setting-last-service" style="background:var(--bg-dark); padding:10px; border-radius:8px; margin-top:5px;">
                     </div>
-                    <div class="input-group" style="background:none; padding:0; margin-bottom:0;">
-                        <label>Intervalo Deseado (Km)</label>
-                        <input type="number" id="setting-interval" placeholder="Ej. 10000" style="background:var(--bg-dark); padding:10px; border-radius:8px; margin-top:5px;">
+                    <div class="input-group" style="background:none; padding:0;">
+                        <label>Intervalo de Servicio (Km)</label>
+                        <input type="number" id="setting-interval" style="background:var(--bg-dark); padding:10px; border-radius:8px; margin-top:5px;">
                     </div>
                 </div>
-                <h4 style="color:var(--text-gray); margin-bottom:10px; text-transform:uppercase; font-size:0.8rem;">Gestión de Datos</h4>
-                <div class="card settings-item" id="export-btn" style="cursor:pointer;">
+
+                <h4 class="settings-title">Gestión de Datos</h4>
+                <div class="card settings-item" id="export-btn" style="cursor:pointer; margin-bottom:10px;">
                     <div style="display:flex; align-items:center; gap:15px;">
                         <div class="card-icon blue"><i class="fas fa-file-download"></i></div>
-                        <div><h4>Guardar Respaldo</h4><p class="sub-label">Descargar archivo .json</p></div>
+                        <div><h4>Guardar Respaldo</h4><p class="sub-label">Descargar .json</p></div>
                     </div>
-                    <i class="fas fa-chevron-right" style="color:var(--text-gray)"></i>
                 </div>
                 <div class="card settings-item" id="import-trigger-btn" style="cursor:pointer;">
                     <div style="display:flex; align-items:center; gap:15px;">
                         <div class="card-icon orange"><i class="fas fa-file-upload"></i></div>
                         <div><h4>Cargar Respaldo</h4><p class="sub-label">Restaurar datos</p></div>
                     </div>
-                    <i class="fas fa-chevron-right" style="color:var(--text-gray)"></i>
                 </div>
                 <input type="file" id="file-input" style="display: none;" accept=".json">
-                <div class="card settings-item" id="reset-app-btn" style="cursor:pointer; border: 1px solid #ef4444; margin-top:20px;">
-                    <div style="display:flex; align-items:center; gap:15px;">
-                        <div class="card-icon" style="background:rgba(239, 68, 68, 0.2); color:#ef4444;"><i class="fas fa-trash-alt"></i></div>
-                        <div><h4 style="color:#ef4444;">Borrar Todo</h4><p class="sub-label">Reiniciar la aplicación</p></div>
-                    </div>
-                </div>
-                <div style="text-align:center; margin-top:50px; color:var(--text-gray); font-size:0.8rem;"><p>Fuel Dashboard v2.1</p></div>
             </div>
+        </div>
+
+        <div id="add-screen" class="screen hidden">
+            <div class="screen-header">
+                <button id="cancel-btn">Cancelar</button>
+                <h2 id="modal-title">Agregar Refill</h2>
+                <button id="delete-btn" style="color:#ef4444; background:none; border:none; display:none;"><i class="fas fa-trash-alt"></i></button>
+            </div>
+            <div class="input-group"><label>FECHA</label><input type="date" id="date-input" style="color-scheme: dark;"></div>
+            <div class="mode-switch-container">
+                <label class="switch-label">Odómetro Total (Manual)</label>
+                <label class="switch"><input type="checkbox" id="mode-toggle"><span class="slider round"></span></label>
+            </div>
+            <div class="input-group" id="input-trip-group" style="border: 1px solid var(--primary-green);">
+                <label style="color:var(--primary-green);">DISTANCIA RECORRIDA (TRIP)</label>
+                <input type="number" id="trip-input" placeholder="0" class="big-input" style="color:var(--primary-green);">
+                <span class="unit" style="color:var(--primary-green);">+km</span>
+            </div>
+            <div class="input-group hidden-input" id="input-odometer-group">
+                <label>ODÓMETRO TOTAL</label>
+                <input type="number" id="odometer" placeholder="0" class="big-input"><span class="unit">km</span>
+            </div>
+            <div class="row">
+                <div class="input-group half"><label>LITROS</label><input type="number" id="liters" placeholder="0.0"></div>
+                <div class="input-group half"><label>COSTO ($)</label><input type="number" id="price" placeholder="0.00"></div>
+            </div>
+            <div class="input-group"><label>GASOLINERA</label><input type="text" id="station" placeholder="Ej. Shell"></div>
+            <button id="save-btn" class="save-btn"><i class="fas fa-check"></i> Guardar</button>
         </div>
 
         <button class="fab-btn"><i class="fas fa-plus"></i> Agregar Nuevo Registro</button>
