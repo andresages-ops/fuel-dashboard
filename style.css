@@ -10,58 +10,70 @@
 
 * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', sans-serif; }
 
-body { background-color: var(--bg-dark); color: var(--text-white); display: flex; justify-content: center; }
+body { background-color: var(--bg-dark); color: var(--text-white); display: flex; justify-content: center; overflow-x: hidden; }
 
-.app-container { width: 100%; max-width: 400px; padding: 20px; padding-bottom: 100px; }
+.app-container { width: 100%; max-width: 400px; padding: 20px; padding-bottom: 100px; min-height: 100vh; }
 
 header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
 
+/* Dashboard */
 .main-stats { text-align: center; margin-bottom: 30px; }
-
 .circle-chart {
     width: 180px; height: 180px; border-radius: 50%;
     background: conic-gradient(var(--primary-green) 75%, #2d3b33 0);
     margin: 0 auto 15px auto; display: flex; align-items: center; justify-content: center; position: relative;
 }
-
 .circle-chart::before {
     content: ""; position: absolute; width: 160px; height: 160px;
     background-color: var(--bg-dark); border-radius: 50%;
 }
-
 .circle-inner { position: relative; z-index: 1; }
 .circle-inner h2 { font-size: 3rem; font-weight: bold; }
 
 .badge { background-color: rgba(34, 197, 94, 0.2); color: var(--primary-green); padding: 5px 15px; border-radius: 20px; font-size: 0.9rem; }
 
 .summary-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 30px; }
-.card { background-color: var(--card-bg); padding: 15px; border-radius: 15px; position: relative; }
+.card { background-color: var(--card-bg); padding: 15px; border-radius: 15px; }
 .card-icon { width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; margin-bottom: 10px; }
 .card-icon.orange { background: rgba(217, 119, 6, 0.2); color: var(--accent-orange); }
 .card-icon.blue { background: rgba(59, 130, 246, 0.2); color: var(--accent-blue); }
 
+.value { font-size: 1.5rem; margin: 5px 0; font-weight: bold; }
 .label { color: var(--text-gray); font-size: 0.9rem; }
-.value { font-size: 1.5rem; margin: 5px 0; }
-.sub-label { color: var(--text-gray); font-size: 0.7rem; }
 
+/* Listas */
 .activity-item { background-color: var(--card-bg); padding: 15px; border-radius: 15px; display: flex; align-items: center; margin-bottom: 10px; }
 .icon-box { background-color: #2d3b33; width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; margin-right: 15px; color: var(--text-gray); }
 .details { flex-grow: 1; }
-.cost { text-align: right; }
+.details p { font-size: 0.8rem; color: var(--text-gray); }
 
-/* Modal "Agregar" */
-.add-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); display: flex; align-items: flex-end; z-index: 1000; }
+/* Formulario Modal */
+.add-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); display: flex; align-items: flex-end; z-index: 1000; }
 .add-modal.hidden { display: none; }
-.modal-content { background: var(--card-bg); width: 100%; padding: 30px 20px; border-radius: 30px 30px 0 0; animation: slideUp 0.3s ease-out; }
+.modal-content { background: var(--card-bg); width: 100%; padding: 30px 20px; border-radius: 30px 30px 0 0; animation: slideUp 0.3s ease-out; max-height: 90vh; overflow-y: auto; }
 @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
 
-.form-group { margin-bottom: 20px; }
-.form-group label { display: block; color: var(--text-gray); margin-bottom: 8px; }
-.form-group input { width: 100%; background: #2d3b33; border: 1px solid #3d4b43; padding: 15px; border-radius: 12px; color: white; font-size: 1.1rem; }
-.save-full-btn { width: 100%; background: var(--primary-green); color: black; border: none; padding: 15px; border-radius: 15px; font-weight: bold; cursor: pointer; }
-.close-btn { background: none; border: none; color: var(--text-gray); font-size: 2rem; cursor: pointer; float: right; }
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.form-group { margin-bottom: 15px; }
+.form-group label { display: block; color: var(--text-gray); margin-bottom: 5px; font-size: 0.9rem; }
+.form-group input, textarea { width: 100%; background: #2d3b33; border: 1px solid #3d4b43; padding: 12px; border-radius: 10px; color: white; font-size: 1rem; }
+textarea { height: 60px; resize: none; }
 
-.fab-btn { position: fixed; bottom: 80px; right: 20px; background-color: var(--primary-green); color: #000; border: none; padding: 15px 25px; border-radius: 30px; font-weight: bold; cursor: pointer; z-index: 99; }
-.bottom-nav { position: fixed; bottom: 0; left: 0; width: 100%; background-color: var(--bg-dark); border-top: 1px solid #2d3b33; display: flex; justify-content: space-around; padding: 15px 0; }
-.bottom-nav a { color: var(--text-gray); text-decoration: none; display: flex; flex-direction: column; align-items: center; font-size: 0.8rem; }
+.fuel-type-selector { display: flex; gap: 10px; }
+.type-btn { flex: 1; padding: 10px; border-radius: 10px; border: 1px solid var(--primary-green); background: transparent; color: white; cursor: pointer; }
+.type-btn.active { background: var(--primary-green); color: black; font-weight: bold; }
+
+.save-full-btn { width: 100%; background: var(--primary-green); color: black; border: none; padding: 15px; border-radius: 15px; font-weight: bold; cursor: pointer; margin-top: 10px; }
+.close-btn { background: none; border: none; color: var(--text-gray); font-size: 2rem; cursor: pointer; }
+
+/* Reportes */
+.reports-container { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg-dark); z-index: 2000; padding: 20px; }
+.reports-container.hidden { display: none; }
+.chart-box { background: var(--card-bg); border-radius: 20px; padding: 15px; margin-top: 20px; }
+
+/* Navegación */
+.fab-btn { position: fixed; bottom: 80px; right: 20px; background-color: var(--primary-green); color: #000; border: none; padding: 15px 25px; border-radius: 30px; font-weight: bold; cursor: pointer; z-index: 99; box-shadow: 0 4px 15px rgba(34,197,94,0.4); }
+.bottom-nav { position: fixed; bottom: 0; left: 0; width: 100%; background-color: var(--bg-dark); border-top: 1px solid #2d3b33; display: flex; justify-content: space-around; padding: 15px 0; z-index: 100; }
+.bottom-nav a { color: var(--text-gray); text-decoration: none; display: flex; flex-direction: column; align-items: center; font-size: 0.75rem; }
 .bottom-nav a.active { color: var(--primary-green); }
+.bottom-nav i { font-size: 1.2rem; margin-bottom: 4px; }
