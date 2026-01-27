@@ -22,7 +22,7 @@
 
         <div id="view-dashboard" class="view-section">
             <div class="filter-container">
-                <div class="custom-dropdown" id="custom-time-filter">
+                <div class="custom-dropdown">
                     <div class="dropdown-trigger" id="dropdown-trigger">
                         <span>Todo el tiempo</span>
                         <i class="fas fa-chevron-down"></i>
@@ -30,8 +30,6 @@
                     <div class="dropdown-options hidden" id="dropdown-options">
                         <div class="dropdown-item selected" data-value="all">Todo el tiempo</div>
                         <div class="dropdown-item" data-value="1">Último Mes</div>
-                        <div class="dropdown-item" data-value="3">Últimos 3 Meses</div>
-                        <div class="dropdown-item" data-value="6">Últimos 6 Meses</div>
                         <div class="dropdown-item" data-value="12">Último Año</div>
                     </div>
                 </div>
@@ -57,7 +55,7 @@
                     <div class="card-icon orange"><i class="fas fa-wallet"></i></div>
                     <p class="label">Total Gastado</p>
                     <h3 class="value" id="total-spent">$0.00</h3>
-                    <p class="sub-label" id="period-label">Histórico</p>
+                    <p class="sub-label">Histórico</p>
                 </div>
                 <div class="card">
                     <div class="card-icon blue"><i class="fas fa-gas-pump"></i></div>
@@ -67,18 +65,14 @@
                 </div>
             </section>
 
-            <section class="chart-section" style="margin-bottom: 80px;">
-                <div class="chart-card">
-                    <h3 class="chart-title">Tendencia de Rendimiento</h3>
-                    <canvas id="efficiencyChart"></canvas>
-                </div>
-            </section>
+            <div class="chart-card">
+                <canvas id="efficiencyChart"></canvas>
+            </div>
         </div>
 
         <div id="view-history" class="view-section hidden-view">
-            <div class="section-header"><h3>Historial de Cargas</h3></div>
+            <div class="section-header"><h3>Historial</h3></div>
             <div id="activity-list"></div>
-            <div style="height: 100px;"></div>
         </div>
 
         <div id="view-vehicle" class="view-section hidden-view">
@@ -86,31 +80,18 @@
             <div class="card vehicle-main-card">
                 <i class="fas fa-tachometer-alt"></i>
                 <p class="label">Kilometraje Actual</p>
-                <h2 class="value" id="vehicle-odometer">--</h2>
+                <h2 id="vehicle-odometer">--</h2>
                 <span class="unit">km</span>
             </div>
-        </div>
-
-        <div id="settings-screen" class="screen hidden">
-            <div class="screen-header">
-                <button id="close-settings-btn" class="text-btn">Cerrar</button>
-                <h2>Ajustes</h2>
-                <div style="width: 50px;"></div>
-            </div>
-            <div class="settings-content">
-                <div class="input-group">
-                    <label>Odómetro Inicial</label>
-                    <input type="number" id="setting-initial-odometer">
+            <div class="card maintenance-card" id="maintenance-alert-card">
+                <div class="maint-info">
+                    <p class="label">Próximo Servicio</p>
+                    <h3 id="next-service-km">--</h3>
                 </div>
-                <div class="input-group">
-                    <label>Último Servicio (Km)</label>
-                    <input type="number" id="setting-last-service">
+                <div class="progress-bar-bg">
+                    <div id="maint-progress-fill" class="progress-bar-fill"></div>
                 </div>
-                <div class="input-group">
-                    <label>Intervalo (Km)</label>
-                    <input type="number" id="setting-interval">
-                </div>
-                <button id="reset-app-btn" class="danger-btn">Borrar todos los datos</button>
+                <p id="maint-status-text" class="sub-label" style="text-align: center; margin-top: 10px;"></p>
             </div>
         </div>
 
@@ -121,16 +102,10 @@
                 <div style="width: 50px;"></div>
             </div>
             <div class="add-form">
-                <div class="input-group">
-                    <label>Fecha</label>
-                    <input type="date" id="date-input">
-                </div>
+                <div class="input-group"><label>Fecha</label><input type="date" id="date-input"></div>
                 <div class="mode-switch-container">
-                    <span class="switch-label">Manual (Odómetro Total)</span>
-                    <label class="switch">
-                        <input type="checkbox" id="mode-toggle">
-                        <span class="slider round"></span>
-                    </label>
+                    <span class="switch-label">Modo Odómetro Total</span>
+                    <label class="switch"><input type="checkbox" id="mode-toggle"><span class="slider round"></span></label>
                 </div>
                 <div class="input-group" id="input-trip-group">
                     <label>Distancia Recorrida (Trip)</label>
@@ -139,18 +114,41 @@
                 </div>
                 <div class="input-group hidden-input" id="input-odometer-group">
                     <label>Odómetro Total</label>
-                    <input type="number" id="odometer" class="big-input" placeholder="0">
+                    <input type="number" id="odometer-input" class="big-input" placeholder="0">
                 </div>
                 <div class="row">
-                    <div class="input-group half"><label>Litros</label><input type="number" id="liters" step="0.01"></div>
-                    <div class="input-group half"><label>Costo ($)</label><input type="number" id="price" step="0.01"></div>
+                    <div class="input-group half"><label>Litros</label><input type="number" id="liters-input" step="0.01"></div>
+                    <div class="input-group half"><label>Precio Total</label><input type="number" id="price-input" step="0.01"></div>
                 </div>
+                <div class="input-group"><label>Gasolinera</label><input type="text" id="station-input" placeholder="Ej. Shell"></div>
+                <div class="input-group"><label>Rango Estimado (Km)</label><input type="number" id="range-input" placeholder="Opcional"></div>
+                <div class="input-group"><label>Notas</label><textarea id="notes-input" rows="2"></textarea></div>
                 <button id="save-btn" class="save-btn">Guardar Registro</button>
             </div>
         </div>
 
+        <div id="settings-screen" class="screen hidden">
+            <div class="screen-header">
+                <button id="close-settings-btn" class="text-btn">Cerrar</button>
+                <h2>Configuración</h2>
+                <div style="width: 50px;"></div>
+            </div>
+            <div class="settings-content">
+                <div class="input-group"><label>Odómetro Inicial</label><input type="number" id="set-init-odo"></div>
+                <div class="input-group"><label>Último Servicio</label><input type="number" id="set-last-maint"></div>
+                <div class="input-group"><label>Intervalo Servicio</label><input type="number" id="set-maint-int"></div>
+                
+                <div class="backup-section">
+                    <button id="export-btn" class="backup-btn"><i class="fas fa-download"></i> Exportar JSON</button>
+                    <button id="import-btn" class="backup-btn"><i class="fas fa-upload"></i> Importar JSON</button>
+                    <input type="file" id="file-import" style="display:none" accept=".json">
+                </div>
+                
+                <button id="reset-app-btn" class="danger-btn">Borrar todo definitivamente</button>
+            </div>
+        </div>
+
         <button class="fab-btn"><i class="fas fa-plus"></i> Nuevo Registro</button>
-        
         <nav class="bottom-nav">
             <a href="#" class="nav-item active" data-target="view-dashboard"><i class="fas fa-th-large"></i><span>Inicio</span></a>
             <a href="#" class="nav-item" data-target="view-history"><i class="fas fa-history"></i><span>Historial</span></a>
