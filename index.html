@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Fuel Dashboard</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="style.css">
@@ -14,8 +14,9 @@
         <header>
             <div class="title-box">
                 <h1>Fuel Dashboard</h1>
-                <span class="beta-tag">v1.0.2-beta</span> </div>
-            <i class="fas fa-cog"></i>
+                <span class="beta-tag">v1.0.3-beta</span>
+            </div>
+            <button onclick="exportarCSV()" class="icon-btn-header"><i class="fas fa-file-export"></i></button>
         </header>
 
         <section class="main-stats">
@@ -31,37 +32,26 @@
 
         <section class="summary-cards">
             <div class="card">
-                <div class="card-icon orange">
-                    <i class="fas fa-wallet"></i>
-                </div>
+                <div class="card-icon orange"><i class="fas fa-wallet"></i></div>
                 <p class="label">Total Gastado</p>
                 <h3 class="value" id="total-spent">$0.00</h3>
-                <p class="sub-label">Acumulado</p>
             </div>
-
             <div class="card">
-                <div class="card-icon blue">
-                    <i class="fas fa-gas-pump"></i>
-                </div>
+                <div class="card-icon blue"><i class="fas fa-gas-pump"></i></div>
                 <p class="label">Última Carga</p>
                 <h3 class="value" id="last-efficiency">--.-</h3>
-                <p class="sub-label">km/l eficiencia</p>
             </div>
         </section>
 
         <section class="recent-activity">
-            <div class="section-header">
-                <h3>Actividad Reciente</h3>
-            </div>
+            <div class="section-header"><h3>Actividad Reciente</h3></div>
             <div id="activity-list"></div>
         </section>
 
-        <button class="fab-btn" id="open-add">
-            <i class="fas fa-plus"></i> Agregar
-        </button>
+        <button class="fab-btn" id="open-add"><i class="fas fa-plus"></i> Agregar</button>
 
-        <div id="add-screen" class="add-modal hidden">
-            <div class="modal-content">
+        <div id="add-screen" class="modal-overlay hidden">
+            <div class="modal-sheet">
                 <header>
                     <h2>Nueva Carga</h2>
                     <button id="cancel-btn" class="close-btn">&times;</button>
@@ -82,55 +72,39 @@
                 </div>
                 
                 <div class="form-row">
-                    <div class="form-group">
-                        <label>Litros</label>
-                        <input type="number" id="liters" placeholder="0.00" step="0.01">
-                    </div>
-                    <div class="form-group">
-                        <label>Costo Total ($)</label>
-                        <input type="number" id="price" placeholder="0.00" step="0.01">
-                    </div>
+                    <div class="form-group"><label>Litros</label><input type="number" id="liters" step="0.01"></div>
+                    <div class="form-group"><label>Costo ($)</label><input type="number" id="price" step="0.01"></div>
                 </div>
 
-                <div class="form-group">
-                    <label>Kilometraje Actual</label>
-                    <input type="number" id="odometer" placeholder="Ej. 45000">
-                </div>
-
-                <div class="form-group">
-                    <label>Gasolinera / Ubicación</label>
-                    <input type="text" id="location" placeholder="Ej. Pemex Vallarta">
-                </div>
-
-                <div class="form-group">
-                    <label>Notas</label>
-                    <textarea id="notes" placeholder="Ej. Viaje en carretera..."></textarea>
-                </div>
+                <div class="form-group"><label>KM Actual</label><input type="number" id="odometer"></div>
+                <div class="form-group"><label>Gasolinera</label><input type="text" id="location"></div>
+                <div class="form-group"><label>Notas</label><textarea id="notes"></textarea></div>
 
                 <button id="save-btn" class="save-full-btn">Registrar Carga</button>
             </div>
         </div>
 
-        <div id="detail-screen" class="add-modal hidden">
-            <div class="modal-content detail-content">
+        <div id="detail-screen" class="modal-overlay hidden">
+            <div class="modal-sheet detail-sheet">
                 <header>
-                    <h2>Detalle de Carga</h2>
+                    <h2>Detalle</h2>
                     <button id="close-detail" class="close-btn">&times;</button>
                 </header>
-                <div id="detail-body"></div>
-                <button id="delete-btn" class="delete-btn">
-                    <i class="fas fa-trash"></i> Eliminar Registro
-                </button>
+                <div id="detail-body" class="detail-container"></div>
+                <button id="delete-btn" class="delete-btn"><i class="fas fa-trash"></i> Eliminar</button>
             </div>
         </div>
 
-        <div id="reports-screen" class="reports-container hidden">
-            <header>
+        <div id="reports-screen" class="full-screen-view hidden">
+            <header class="padded-header">
                 <h2>Análisis</h2>
                 <button onclick="cerrarReportes()" class="close-btn">&times;</button>
             </header>
-            <div class="chart-box">
+            <div class="chart-wrapper">
                 <canvas id="efficiencyChart"></canvas>
+            </div>
+            <div class="report-info">
+                <p>Gráfica de rendimiento histórico basada en tus últimas cargas.</p>
             </div>
         </div>
 
