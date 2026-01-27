@@ -47,7 +47,6 @@
                     </div>
                 </div>
                 <h3>Eficiencia Promedio</h3>
-                <span class="badge" id="condition-badge">Calculando...</span>
             </section>
 
             <section class="summary-cards">
@@ -55,13 +54,11 @@
                     <div class="card-icon orange"><i class="fas fa-wallet"></i></div>
                     <p class="label">Total Gastado</p>
                     <h3 class="value" id="total-spent">$0.00</h3>
-                    <p class="sub-label">Histórico</p>
                 </div>
                 <div class="card">
                     <div class="card-icon blue"><i class="fas fa-gas-pump"></i></div>
                     <p class="label">Última Carga</p>
                     <h3 class="value" id="last-efficiency">--</h3>
-                    <p class="sub-label">km/l eficiencia</p>
                 </div>
             </section>
 
@@ -76,22 +73,17 @@
         </div>
 
         <div id="view-vehicle" class="view-section hidden-view">
-            <div class="section-header"><h3>Estado del Vehículo</h3></div>
-            <div class="card vehicle-main-card">
-                <i class="fas fa-tachometer-alt"></i>
-                <p class="label">Kilometraje Actual</p>
+            <div class="section-header"><h3>Vehículo</h3></div>
+            <div class="card" style="text-align:center;">
+                <i class="fas fa-tachometer-alt" style="font-size:2rem; color:var(--primary-green);"></i>
+                <p class="label">Odómetro</p>
                 <h2 id="vehicle-odometer">--</h2>
                 <span class="unit">km</span>
             </div>
-            <div class="card maintenance-card" id="maintenance-alert-card">
-                <div class="maint-info">
-                    <p class="label">Próximo Servicio</p>
-                    <h3 id="next-service-km">--</h3>
-                </div>
-                <div class="progress-bar-bg">
-                    <div id="maint-progress-fill" class="progress-bar-fill"></div>
-                </div>
-                <p id="maint-status-text" class="sub-label" style="text-align: center; margin-top: 10px;"></p>
+            <div class="card" id="maintenance-card" style="margin-top:15px;">
+                <p class="label">Próximo Servicio</p>
+                <h3 id="next-service-km">--</h3>
+                <div class="progress-bar-bg"><div id="maint-progress-fill" class="progress-bar-fill"></div></div>
             </div>
         </div>
 
@@ -101,51 +93,44 @@
                 <h2>Nuevo Registro</h2>
                 <div style="width: 50px;"></div>
             </div>
-            <div class="add-form">
-                <div class="input-group"><label>Fecha</label><input type="date" id="date-input"></div>
-                <div class="mode-switch-container">
-                    <span class="switch-label">Modo Odómetro Total</span>
-                    <label class="switch"><input type="checkbox" id="mode-toggle"><span class="slider round"></span></label>
-                </div>
-                <div class="input-group" id="input-trip-group">
-                    <label>Distancia Recorrida (Trip)</label>
-                    <input type="number" id="trip-input" class="big-input" placeholder="0">
-                    <p class="sub-label">Anterior: <span id="prev-odometer-display">--</span> km</p>
-                </div>
-                <div class="input-group hidden-input" id="input-odometer-group">
-                    <label>Odómetro Total</label>
-                    <input type="number" id="odometer-input" class="big-input" placeholder="0">
-                </div>
-                <div class="row">
-                    <div class="input-group half"><label>Litros</label><input type="number" id="liters-input" step="0.01"></div>
-                    <div class="input-group half"><label>Precio Total</label><input type="number" id="price-input" step="0.01"></div>
-                </div>
-                <div class="input-group"><label>Gasolinera</label><input type="text" id="station-input" placeholder="Ej. Shell"></div>
-                <div class="input-group"><label>Rango Estimado (Km)</label><input type="number" id="range-input" placeholder="Opcional"></div>
-                <div class="input-group"><label>Notas</label><textarea id="notes-input" rows="2"></textarea></div>
-                <button id="save-btn" class="save-btn">Guardar Registro</button>
+            <div class="input-group"><label>Fecha</label><input type="date" id="date-input"></div>
+            <div class="mode-switch-container">
+                <span class="switch-label">Modo Odómetro Total</span>
+                <label class="switch"><input type="checkbox" id="mode-toggle"><span class="slider round"></span></label>
             </div>
+            <div class="input-group" id="input-trip-group">
+                <label>Distancia (Trip)</label>
+                <input type="number" id="trip-input" class="big-input" placeholder="0">
+                <p class="sub-label">Anterior: <span id="prev-odometer-display">--</span> km</p>
+            </div>
+            <div class="input-group hidden-input" id="input-odometer-group">
+                <label>Odómetro Total</label>
+                <input type="number" id="odometer-input" class="big-input" placeholder="0">
+            </div>
+            <div class="row">
+                <div class="input-group half"><label>Litros</label><input type="number" id="liters-input" step="0.1"></div>
+                <div class="input-group half"><label>Precio</label><input type="number" id="price-input" step="0.1"></div>
+            </div>
+            <div class="input-group"><label>Gasolinera</label><input type="text" id="station-input" placeholder="Ej. Shell"></div>
+            <div class="input-group"><label>Notas</label><textarea id="notes-input" rows="2"></textarea></div>
+            <button id="save-btn" class="save-btn">Guardar</button>
         </div>
 
         <div id="settings-screen" class="screen hidden">
             <div class="screen-header">
                 <button id="close-settings-btn" class="text-btn">Cerrar</button>
-                <h2>Configuración</h2>
+                <h2>Ajustes</h2>
                 <div style="width: 50px;"></div>
             </div>
-            <div class="settings-content">
-                <div class="input-group"><label>Odómetro Inicial</label><input type="number" id="set-init-odo"></div>
-                <div class="input-group"><label>Último Servicio</label><input type="number" id="set-last-maint"></div>
-                <div class="input-group"><label>Intervalo Servicio</label><input type="number" id="set-maint-int"></div>
-                
-                <div class="backup-section">
-                    <button id="export-btn" class="backup-btn"><i class="fas fa-download"></i> Exportar JSON</button>
-                    <button id="import-btn" class="backup-btn"><i class="fas fa-upload"></i> Importar JSON</button>
-                    <input type="file" id="file-import" style="display:none" accept=".json">
-                </div>
-                
-                <button id="reset-app-btn" class="danger-btn">Borrar todo definitivamente</button>
+            <div class="input-group"><label>Odómetro Inicial</label><input type="number" id="set-init-odo"></div>
+            <div class="input-group"><label>Último Servicio</label><input type="number" id="set-last-maint"></div>
+            <div class="input-group"><label>Intervalo</label><input type="number" id="set-maint-int"></div>
+            <div style="display:flex; gap:10px; margin-top:20px;">
+                <button id="export-btn" class="backup-btn">Exportar</button>
+                <button id="import-btn" class="backup-btn">Importar</button>
+                <input type="file" id="file-import" style="display:none">
             </div>
+            <button id="reset-app-btn" class="danger-btn">Borrar Todo</button>
         </div>
 
         <button class="fab-btn"><i class="fas fa-plus"></i> Nuevo Registro</button>
