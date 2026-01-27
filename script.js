@@ -1,7 +1,8 @@
-// Variables y Elementos
+// Elementos
 const addScreen = document.getElementById('add-screen');
 const detailScreen = document.getElementById('detail-screen');
 const reportsScreen = document.getElementById('reports-screen');
+const settingsScreen = document.getElementById('settings-screen');
 const dateInput = document.getElementById('log-date');
 
 let selectedFuel = "Regular";
@@ -13,7 +14,15 @@ window.onpopstate = () => {
     addScreen.classList.add('hidden');
     detailScreen.classList.add('hidden');
     reportsScreen.classList.add('hidden');
+    settingsScreen.classList.add('hidden');
 };
+
+// SETTINGS & KM INICIAL
+function guardarKMInicial() {
+    const val = document.getElementById('initial-km').value;
+    localStorage.setItem('initialKM', val);
+    cargarApp();
+}
 
 // SWITCH DINÁMICO
 function switchFuel(type, index) {
@@ -29,14 +38,20 @@ function switchFuel(type, index) {
 // EXPORTAR / IMPORTAR CSV
 function exportarCSV() {
     const h = JSON.parse(localStorage.getItem('fuelLogs')) || [];
+    const initKM = localStorage.getItem('initialKM') || "0";
     if (!h.length) return alert("No hay datos");
-    let csv = "Fecha,Litros,Costo,KM,Gasolinera,Tipo,Notas\n";
-    h.forEach(r => csv += `${r.fecha},${r.litros},${r.costo},${r.km},"${r.gasolinera}",${r.tipo},"${r.notas}"\n`);
+    
+    let csv = "Fecha,Litros,Costo,Precio_L,KM,Gasolinera,Tipo,Notas,KM_Inicial_Ref\n";
+    h.forEach(r => {
+        const precioL = (r.costo / r.litros).toFixed(2);
+        csv += `${r.fecha},${r.litros},${r.costo},${precioL},${r.km},"${r.gasolinera}",${r.tipo},"${r.notas}",${initKM}\n`;
+    });
+    
     const blob = new Blob([csv], { type: 'text/csv' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `Fuel_Data.csv`;
+    a.download = `Fuel_Respaldo.csv`;
     a.click();
 }
 
@@ -45,14 +60,23 @@ function importarCSV(event) {
     if (!file) return;
     const reader = new FileReader();
     reader.onload = (e) => {
-        const lines = e.target.result.split('\n').slice(1);
-        const nuevos = lines.filter(l => l.trim()).map(l => {
+        const lines = e.target.result.split('\n').filter(l => l.trim());
+        const header = lines[0].split(',');
+        const content = lines.slice(1);
+        
+        const nuevos = content.map(l => {
             const c = l.split(',');
-            return { fecha: c[0], litros: parseFloat(c[1]), costo: parseFloat(c[2]), km: parseInt(c[3]), gasolinera: c[4].replace(/"/g,''), tipo: c[5], notas: c[6]?.replace(/"/g,'') || "" };
+            if (c[8]) localStorage.setItem('initialKM', c[8]); // Recuperar KM Inicial si existe
+            return { 
+                fecha: c[0], litros: parseFloat(c[1]), costo: parseFloat(c[2]), 
+                km: parseInt(c[4]), gasolinera: c[5].replace(/"/g,''), 
+                tipo: c[6], notas: c[7]?.replace(/"/g,'') || "" 
+            };
         });
         localStorage.setItem('fuelLogs', JSON.stringify(nuevos));
         cargarApp();
-        alert("Datos importados con éxito");
+        alert("Importación exitosa");
+        settingsScreen.classList.add('hidden');
     };
     reader.readAsText(file);
 }
@@ -83,17 +107,31 @@ document.getElementById('save-btn').onclick = () => {
 // DASHBOARD
 function cargarApp() {
     const h = JSON.parse(localStorage.getItem('fuelLogs')) || [];
+    const initKM = parseInt(localStorage.getItem('initialKM')) || 0;
     const list = document.getElementById('activity-list');
+    
+    document.getElementById('initial-km').value = initKM || "";
     list.innerHTML = '';
     
     if (h.length > 0) {
         document.getElementById('total-spent').textContent = `$${h.reduce((a,b)=>a+b.costo,0).toLocaleString()}`;
-        if(h.length >= 2) {
-            const last = h[h.length-1], first = h[0], totL = h.slice(1).reduce((a,b)=>a+b.litros,0);
-            document.getElementById('avg-efficiency').textContent = ((last.km-first.km)/totL).toFixed(1);
-            document.getElementById('last-efficiency').textContent = ((last.km-h[h.length-2].km)/last.litros).toFixed(1);
-            document.getElementById('data-status').textContent = "Actualizado";
+        
+        // Eficiencia Promedio (usando KM Inicial si existe)
+        const last = h[h.length-1];
+        const baseKM = initKM > 0 ? initKM : h[0].km;
+        const totL = initKM > 0 ? h.reduce((a,b)=>a+b.litros,0) : h.slice(1).reduce((a,b)=>a+b.litros,0);
+        
+        if (totL > 0) {
+            document.getElementById('avg-efficiency').textContent = ((last.km - baseKM)/totL).toFixed(1);
         }
+
+        // Última Eficiencia
+        if (h.length >= 2) {
+            document.getElementById('last-efficiency').textContent = ((last.km-h[h.length-2].km)/last.litros).toFixed(1);
+        } else if (initKM > 0) {
+            document.getElementById('last-efficiency').textContent = ((last.km-initKM)/last.litros).toFixed(1);
+        }
+        document.getElementById('data-status').textContent = "Actualizado";
     }
 
     h.slice().reverse().forEach((reg, i) => {
@@ -102,13 +140,16 @@ function cargarApp() {
         div.className = 'activity-item';
         div.onclick = () => {
             currentDetailIndex = idx;
-            let eff = idx > 0 ? `${((reg.km - h[idx-1].km)/reg.litros).toFixed(2)} KM/L` : "N/A";
+            const prevKM = idx > 0 ? h[idx-1].km : initKM;
+            let eff = prevKM > 0 ? `${((reg.km - prevKM)/reg.litros).toFixed(2)} KM/L` : "N/A";
+            
             document.getElementById('detail-body').innerHTML = `
                 <div class="detail-item"><span>Fecha</span><span>${reg.fecha}</span></div>
                 <div class="detail-item"><span>Rendimiento</span><span style="color:var(--primary-green)">${eff}</span></div>
-                <div class="detail-item"><span>KM Total</span><span>${reg.km.toLocaleString()}</span></div>
+                <div class="detail-item"><span>Precio x Litro</span><span>$${(reg.costo/reg.litros).toFixed(2)}</span></div>
+                <div class="detail-item"><span>KM Registro</span><span>${reg.km.toLocaleString()}</span></div>
                 <div class="detail-item"><span>Litros</span><span>${reg.litros} L</span></div>
-                <div class="detail-item"><span>Costo</span><span>$${reg.costo}</span></div>`;
+                <div class="detail-item"><span>Costo Total</span><span>$${reg.costo}</span></div>`;
             detailScreen.classList.remove('hidden');
             window.history.pushState({m:1},"");
         };
@@ -126,16 +167,26 @@ function cargarApp() {
 document.getElementById('nav-reports').onclick = (e) => {
     e.preventDefault();
     const h = JSON.parse(localStorage.getItem('fuelLogs')) || [];
-    if(h.length < 2) return alert("Mínimo 2 registros");
+    const initKM = parseInt(localStorage.getItem('initialKM')) || 0;
+    if(h.length < 1 || (h.length < 2 && initKM === 0)) return alert("Datos insuficientes");
+    
     reportsScreen.classList.remove('hidden');
     window.history.pushState({m:1},"");
-    const labels = h.slice(1).map(r => r.fecha);
-    const data = h.slice(1).map((r, i) => ((r.km - h[i].km)/r.litros).toFixed(2));
+    
+    const labels = h.map(r => r.fecha);
+    const data = h.map((r, i) => {
+        const prev = i > 0 ? h[i-1].km : initKM;
+        return prev > 0 ? ((r.km - prev)/r.litros).toFixed(2) : 0;
+    });
+
     const ctx = document.getElementById('efficiencyChart').getContext('2d');
     if(chartInstance) chartInstance.destroy();
     chartInstance = new Chart(ctx, { type: 'line', data: { labels, datasets:[{ data, borderColor:'#22c55e', tension:0.4, fill:true, backgroundColor:'rgba(34,197,94,0.1)' }] }, options: { responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}} } });
 };
 
+// BOTONES MODALES
+document.getElementById('open-settings').onclick = () => { settingsScreen.classList.remove('hidden'); window.history.pushState({m:1},""); };
+document.getElementById('close-settings').onclick = () => window.history.back();
 document.getElementById('open-add').onclick = () => { dateInput.value = new Date().toISOString().split('T')[0]; addScreen.classList.remove('hidden'); window.history.pushState({m:1},""); };
 document.getElementById('cancel-btn').onclick = () => window.history.back();
 document.getElementById('close-detail').onclick = () => window.history.back();

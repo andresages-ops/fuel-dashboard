@@ -14,13 +14,9 @@
         <header>
             <div class="title-box">
                 <h1>Fuel Dashboard</h1>
-                <span class="beta-tag">v1.0.4-beta</span>
+                <span class="beta-tag">v1.0.5-beta</span>
             </div>
-            <div class="header-actions">
-                <button onclick="document.getElementById('import-file').click()" class="icon-btn-header"><i class="fas fa-file-import"></i></button>
-                <button onclick="exportarCSV()" class="icon-btn-header"><i class="fas fa-file-export"></i></button>
-                <input type="file" id="import-file" style="display:none" accept=".csv" onchange="importarCSV(event)">
-            </div>
+            <button id="open-settings" class="icon-btn-header"><i class="fas fa-cog"></i></button>
         </header>
 
         <section class="main-stats">
@@ -53,6 +49,32 @@
         </section>
 
         <button class="fab-btn" id="open-add"><i class="fas fa-plus"></i> Agregar</button>
+
+        <div id="settings-screen" class="modal-overlay hidden">
+            <div class="modal-sheet">
+                <header>
+                    <h2>Configuración</h2>
+                    <button id="close-settings" class="close-btn">&times;</button>
+                </header>
+                <div class="settings-content">
+                    <div class="form-group">
+                        <label>Kilometraje Inicial del Vehículo</label>
+                        <input type="number" id="initial-km" placeholder="Ej. 40000" onchange="guardarKMInicial()">
+                        <p class="chart-info">Se usa para calcular el rendimiento de tu primera carga registrada.</p>
+                    </div>
+                    <hr class="divider">
+                    <div class="action-list">
+                        <button onclick="document.getElementById('import-file').click()" class="action-item">
+                            <i class="fas fa-file-import"></i> Importar Datos (CSV)
+                        </button>
+                        <button onclick="exportarCSV()" class="action-item">
+                            <i class="fas fa-file-export"></i> Exportar Datos (CSV)
+                        </button>
+                        <input type="file" id="import-file" style="display:none" accept=".csv" onchange="importarCSV(event)">
+                    </div>
+                </div>
+            </div>
+        </div>
 
         <div id="add-screen" class="modal-overlay hidden">
             <div class="modal-sheet">
