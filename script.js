@@ -33,6 +33,12 @@ function switchFuel(type, index) {
     buttons[index].classList.add('active');
 }
 
+// --- MODO ODÓMETRO ---
+document.getElementById('mode-toggle').onchange = (e) => {
+    document.getElementById('input-trip-group').classList.toggle('hidden-input', e.target.checked);
+    document.getElementById('input-odometer-group').classList.toggle('hidden-input', !e.target.checked);
+};
+
 // --- CÁLCULOS ---
 function recalculateAll() {
     refills.sort((a, b) => a.odometer - b.odometer);
@@ -53,17 +59,30 @@ function recalculateAll() {
 function renderApp() {
     recalculateAll();
     const list = document.getElementById('activity-list');
+    if(!list) return;
     list.innerHTML = '';
 
     if (refills.length > 0) {
         document.getElementById('total-spent').innerText = `$${refills.reduce((s, r) => s + r.price, 0).toFixed(2)}`;
         const valid = refills.filter(r => parseFloat(r.efficiencyKmL) > 0);
+        
         if (valid.length > 0) {
             const avg = (valid.reduce((s, r) => s + parseFloat(r.efficiencyKmL), 0) / valid.length).toFixed(1);
             document.getElementById('average-display').innerText = avg;
             updateCircle(avg);
+            document.getElementById('condition-badge').innerText = avg > 14 ? "Excelente" : avg > 11 ? "Buena" : "Baja";
         }
-        document.getElementById('vehicle-odometer').innerText = refills[refills.length - 1].odometer.toLocaleString();
+
+        const latestOdo = refills[refills.length - 1].odometer;
+        document.getElementById('vehicle-odometer').innerText = latestOdo.toLocaleString();
+        
+        // Mantenimiento
+        const next = vehicleConfig.lastService + vehicleConfig.interval;
+        const left = next - latestOdo;
+        document.getElementById('next-service').innerText = `${left.toLocaleString()} km`;
+        document.getElementById('service-interval-label').innerText = `Próximo a los ${next.toLocaleString()} km`;
+        const prog = Math.min(((latestOdo - vehicleConfig.lastService) / vehicleConfig.interval) * 100, 100);
+        document.getElementById('service-progress').style.width = `${prog}%`;
     }
 
     refills.slice().reverse().forEach(r => {
@@ -81,6 +100,7 @@ function renderApp() {
 
 function updateCircle(avg) {
     const circle = document.querySelector('.progress-ring__circle');
+    if(!circle) return;
     const radius = circle.r.baseVal.value;
     const circumference = radius * 2 * Math.PI;
     circle.style.strokeDasharray = `${circumference} ${circumference}`;
@@ -89,7 +109,13 @@ function updateCircle(avg) {
 }
 
 // --- MODALES ---
-document.getElementById('settings-btn').onclick = () => settingsScreen.classList.remove('hidden');
+document.getElementById('settings-btn').onclick = () => {
+    document.getElementById('setting-start-km').value = vehicleConfig.startKM;
+    document.getElementById('setting-last-service').value = vehicleConfig.lastService;
+    document.getElementById('setting-interval').value = vehicleConfig.interval;
+    settingsScreen.classList.remove('hidden');
+};
+
 document.getElementById('close-settings-btn').onclick = () => {
     vehicleConfig.startKM = parseFloat(document.getElementById('setting-start-km').value) || 0;
     vehicleConfig.lastService = parseFloat(document.getElementById('setting-last-service').value) || 0;
@@ -104,17 +130,27 @@ addBtn.onclick = () => {
     addScreen.classList.remove('hidden');
 };
 
+document.getElementById('cancel-btn').onclick = () => addScreen.classList.add('hidden');
+
 document.getElementById('save-btn').onclick = () => {
     const l = parseFloat(document.getElementById('liters').value);
     const p = parseFloat(document.getElementById('price').value);
-    const km = parseInt(document.getElementById('odometer').value);
-    if (!l || !p || !km) return alert("Completa los datos");
+    let km = 0;
+
+    if (document.getElementById('mode-toggle').checked) {
+        km = parseInt(document.getElementById('odometer').value);
+    } else {
+        const lastKM = refills.length > 0 ? refills[refills.length-1].odometer : (vehicleConfig.startKM || 0);
+        km = lastKM + parseInt(document.getElementById('trip-input').value || 0);
+    }
+
+    if (!l || !p || !km) return alert("Faltan datos");
 
     refills.push({
         id: Date.now(), rawDate: document.getElementById('date-input').value,
         liters: l, price: p, odometer: km,
         station: document.getElementById('station').value || "Gasolinera",
-        tipo: selectedFuel, notes: document.getElementById('notes').value
+        tipo: selectedFuel
     });
     localStorage.setItem('refills', JSON.stringify(refills));
     addScreen.classList.add('hidden');
@@ -123,7 +159,8 @@ document.getElementById('save-btn').onclick = () => {
 
 function updateChart() {
     const ctx = document.getElementById('efficiencyChart');
-    if (chartInstance) chartInstance.destroy();
+    if (!ctx || chartInstance) if(chartInstance) chartInstance.destroy();
+    if(!ctx) return;
     const valid = refills.filter(r => parseFloat(r.efficiencyKmL) > 0);
     chartInstance = new Chart(ctx, {
         type: 'line',
@@ -134,5 +171,22 @@ function updateChart() {
         options: { responsive: true, plugins: { legend: { display: false } } }
     });
 }
+
+document.getElementById('export-btn').onclick = () => {
+    const blob = new Blob([JSON.stringify(refills)], {type: "application/json"});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a'); a.href = url; a.download = "fuel_data.json"; a.click();
+};
+
+document.getElementById('import-trigger-btn').onclick = () => document.getElementById('file-input').click();
+document.getElementById('file-input').onchange = (e) => {
+    const reader = new FileReader();
+    reader.onload = (event) => {
+        refills = JSON.parse(event.target.result);
+        localStorage.setItem('refills', JSON.stringify(refills));
+        renderApp();
+    };
+    reader.readAsText(e.target.files[0]);
+};
 
 window.onload = renderApp;
