@@ -23,7 +23,6 @@
                         "danger": "#dc2626",
                         "background-light": "#f6f8f6",
                         "background-dark": "#112116",
-                        "card-light": "#ffffff",
                         "card-dark": "#1c2a21",
                         "surface-dark": "#1c261f", 
                         "surface-highlight": "#253329",
@@ -42,7 +41,6 @@
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
         
-        /* Animación vistas */
         .view-section { 
             display: none; 
             min-height: 100vh;
@@ -56,13 +54,10 @@
         }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         
-        /* Gauge Circular */
-        /* Ajustado max-height y margin para evitar solapamiento */
         .circular-chart { display: block; margin: 0 auto; max-width: 100%; max-height: 200px; } 
         .circle-bg { fill: none; stroke: #2A3830; }
         .circle { fill: none; stroke-width: 2.8; stroke-linecap: round; transition: stroke-dasharray 1s ease-out; }
 
-        /* Segmented Control */
         .segmented-control input:checked + label { color: #000; font-weight: 700; }
         #type-regular:checked + label { background-color: #19e65e; }
         #type-premium:checked + label { background-color: #dc2626; color: #fff; }
@@ -72,14 +67,25 @@
 <body class="bg-background-light dark:bg-background-dark font-display text-slate-900 dark:text-white transition-colors duration-200 min-h-screen relative">
 
     <div id="view-dashboard" class="view-section active">
-        <header class="sticky top-0 z-30 flex items-center justify-center py-3 bg-background-dark/95 backdrop-blur-md border-b border-white/5">
-            <div class="flex items-center gap-2">
+        <header class="sticky top-0 z-30 flex flex-col items-center justify-center pt-3 pb-2 bg-background-dark/95 backdrop-blur-md border-b border-white/5">
+            <div class="flex items-center gap-2 mb-3">
                 <h1 class="text-base font-bold tracking-tight text-center">Fuel Dashboard</h1>
-                <span id="version-label" class="text-[9px] font-bold bg-primary/20 text-primary px-1.5 py-0.5 rounded border border-primary/20">v1.3</span>
+                <span id="version-label" class="text-[9px] font-bold bg-primary/20 text-primary px-1.5 py-0.5 rounded border border-primary/20">v1.4</span>
+            </div>
+            
+            <div class="w-full overflow-x-auto no-scrollbar px-4 pb-2">
+                <div class="flex gap-2 min-w-max">
+                    <button onclick="setFilter('1W')" id="filter-1W" class="filter-chip px-3 py-1.5 rounded-full text-xs font-bold transition-all bg-surface-dark text-gray-400 border border-white/5">1 Sem</button>
+                    <button onclick="setFilter('1M')" id="filter-1M" class="filter-chip px-3 py-1.5 rounded-full text-xs font-bold transition-all bg-primary text-black border border-primary">1 Mes</button>
+                    <button onclick="setFilter('3M')" id="filter-3M" class="filter-chip px-3 py-1.5 rounded-full text-xs font-bold transition-all bg-surface-dark text-gray-400 border border-white/5">3 Meses</button>
+                    <button onclick="setFilter('6M')" id="filter-6M" class="filter-chip px-3 py-1.5 rounded-full text-xs font-bold transition-all bg-surface-dark text-gray-400 border border-white/5">6 Meses</button>
+                    <button onclick="setFilter('1Y')" id="filter-1Y" class="filter-chip px-3 py-1.5 rounded-full text-xs font-bold transition-all bg-surface-dark text-gray-400 border border-white/5">Año</button>
+                    <button onclick="setFilter('ALL')" id="filter-ALL" class="filter-chip px-3 py-1.5 rounded-full text-xs font-bold transition-all bg-surface-dark text-gray-400 border border-white/5">Todo</button>
+                </div>
             </div>
         </header>
 
-        <main class="flex-1 flex flex-col gap-5 p-4 max-w-md mx-auto w-full">
+        <main class="flex-1 flex flex-col gap-4 p-4 max-w-md mx-auto w-full">
             <section class="flex flex-col items-center justify-center pt-2 pb-2">
                 <div class="relative w-52 h-52 flex items-center justify-center mb-2">
                     <svg class="circular-chart transform -rotate-90 w-full h-full" viewBox="0 0 36 36">
@@ -92,7 +98,7 @@
                     </div>
                 </div>
                 <div class="text-center">
-                    <h2 class="text-sm font-semibold text-gray-400 uppercase tracking-wide">Eficiencia Promedio</h2>
+                    <h2 class="text-sm font-semibold text-gray-400 uppercase tracking-wide">Eficiencia <span id="period-label-text">Mensual</span></h2>
                     <p id="maintenance-alert" class="text-[10px] text-orange-400 font-medium mt-1 hidden bg-orange-900/30 px-2 py-0.5 rounded-full">
                         ⚠️ Mantenimiento
                     </p>
@@ -107,7 +113,7 @@
                         </span>
                     </div>
                     <div>
-                        <p class="text-xs text-gray-400 font-medium">Gasto Total</p>
+                        <p class="text-xs text-gray-400 font-medium">Gasto (<span id="spent-period-label">Mes</span>)</p>
                         <p id="dash-total-spent" class="text-xl font-bold mt-0.5">$0</p>
                     </div>
                 </div>
@@ -126,12 +132,12 @@
             </section>
 
             <section class="w-full mt-2">
-                <div class="flex items-center justify-between mb-3 px-1">
+                <div class="flex items-center justify-between mb-2 px-1">
                     <h3 class="text-base font-bold">Actividad Reciente</h3>
                     <button onclick="switchView('history')" class="text-xs font-semibold text-primary hover:text-primary/80">Ver Todo</button>
                 </div>
-                <div id="dash-recent-list" class="flex flex-col gap-3">
-                    <p class="text-center text-gray-500 py-4 text-xs">No hay registros aún.</p>
+                <div id="dash-recent-list" class="flex flex-col gap-2">
+                    <p class="text-center text-gray-500 py-4 text-xs">No hay registros en este periodo.</p>
                 </div>
             </section>
         </main>
@@ -154,29 +160,67 @@
 
     <div id="view-stats" class="view-section">
         <header class="sticky top-0 z-20 flex items-center justify-center bg-background-dark/90 py-3 backdrop-blur-md">
-            <h2 class="text-base font-bold">Estadísticas</h2>
+            <h2 class="text-base font-bold">Reportes</h2>
         </header>
-        <div class="px-4 py-4">
-            <div class="flex flex-col gap-4 rounded-2xl bg-card-dark p-5 shadow-sm border border-transparent mb-4">
+        <div class="px-4 py-4 pb-20">
+            <div class="flex flex-col gap-4 rounded-2xl bg-card-dark p-5 shadow-sm border border-transparent mb-5">
                 <div class="flex items-start justify-between">
                     <div class="flex flex-col gap-1">
-                        <p class="text-slate-400 text-xs font-medium uppercase tracking-wide">Tendencia</p>
+                        <p class="text-slate-400 text-xs font-medium uppercase tracking-wide">Tendencia de Eficiencia</p>
                         <h3 id="stats-avg-eff" class="text-2xl font-bold leading-tight">-- <span class="text-sm font-semibold text-slate-400">km/l</span></h3>
                     </div>
                 </div>
-                <div class="relative h-[220px] w-full">
+                <div class="relative h-[200px] w-full">
                     <canvas id="efficiencyChart"></canvas>
                 </div>
             </div>
-            <div class="grid grid-cols-2 gap-3">
-                <div class="rounded-xl bg-card-dark p-3 border border-transparent">
-                    <p class="text-slate-400 text-[10px] font-medium uppercase mb-1">Mejor</p>
-                    <h2 id="stats-best" class="text-white text-base font-bold">--</h2>
+
+            <div class="grid grid-cols-2 gap-4">
+                
+                <div class="flex flex-col gap-2 rounded-2xl bg-card-dark p-4 border border-white/5">
+                    <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/20 text-primary">
+                        <span class="material-symbols-outlined">emoji_events</span>
+                    </div>
+                    <div>
+                        <p class="text-slate-400 text-[10px] font-bold uppercase tracking-wider">Mejor Eficiencia</p>
+                        <h2 id="stats-best" class="text-white text-xl font-bold mt-0.5">--</h2>
+                        <p id="stats-best-date" class="text-slate-500 text-[10px] mt-0.5">--</p>
+                    </div>
                 </div>
-                <div class="rounded-xl bg-card-dark p-3 border border-transparent">
-                    <p class="text-slate-400 text-[10px] font-medium uppercase mb-1">Peor</p>
-                    <h2 id="stats-worst" class="text-white text-base font-bold">--</h2>
+
+                <div class="flex flex-col gap-2 rounded-2xl bg-card-dark p-4 border border-white/5">
+                    <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-orange-500/20 text-orange-500">
+                        <span class="material-symbols-outlined">warning</span>
+                    </div>
+                    <div>
+                        <p class="text-slate-400 text-[10px] font-bold uppercase tracking-wider">Peor Eficiencia</p>
+                        <h2 id="stats-worst" class="text-white text-xl font-bold mt-0.5">--</h2>
+                        <p id="stats-worst-date" class="text-slate-500 text-[10px] mt-0.5">--</p>
+                    </div>
                 </div>
+
+                <div class="flex flex-col gap-2 rounded-2xl bg-card-dark p-4 border border-white/5">
+                    <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-500/20 text-blue-400">
+                        <span class="material-symbols-outlined">local_gas_station</span>
+                    </div>
+                    <div>
+                        <p class="text-slate-400 text-[10px] font-bold uppercase tracking-wider">Precio Promedio</p>
+                        <h2 id="stats-avg-price" class="text-white text-xl font-bold mt-0.5">--</h2>
+                        <p class="text-slate-500 text-[10px] mt-0.5">Por litro</p>
+                    </div>
+                </div>
+
+                <div class="flex flex-col gap-2 rounded-2xl bg-card-dark p-4 border border-white/5">
+                    <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-purple-500/20 text-purple-400">
+                        <span class="material-symbols-outlined">account_balance_wallet</span>
+                    </div>
+                    <div>
+                        <p class="text-slate-400 text-[10px] font-bold uppercase tracking-wider">Gasto Total</p>
+                        <h2 id="stats-total-cost" class="text-white text-xl font-bold mt-0.5">--</h2>
+                        <p class="text-slate-500 text-[10px] mt-0.5">Histórico</p>
+                    </div>
+                </div>
+
             </div>
         </div>
     </div>
@@ -310,7 +354,6 @@
             </div>
 
             <div class="p-5 flex flex-col gap-4 overflow-y-auto">
-                
                 <div class="bg-surface-highlight rounded-xl p-4 flex justify-between items-center border border-white/5">
                     <div>
                         <p class="text-[10px] text-gray-400 uppercase font-bold tracking-wider">Costo Total</p>
@@ -390,82 +433,75 @@
     <script>
         // --- ESTADO ---
         let appData = {
-            settings: {
-                initialOdometer: 0,
-                nextServiceKm: 0
-            },
-            refills: [] // { id, date, odometer, volume, cost, location, type, notes, range }
+            settings: { initialOdometer: 0, nextServiceKm: 0 },
+            refills: []
         };
+        let currentFilter = '1M'; // Filtro por defecto: 1 Mes
 
         const STORAGE_KEY = 'fuel_app_db_v1';
         let efficiencyChartInstance = null;
 
-        // --- INICIALIZACIÓN ---
         window.addEventListener('DOMContentLoaded', () => {
             loadData();
             history.replaceState({view: 'dashboard'}, 'Dashboard', '');
-            renderDashboard();
-            // Setear fecha hoy (YYYY-MM-DD)
+            setFilter('1M'); // Inicializar dashboard con filtro
             document.getElementById('input-date').value = new Date().toISOString().split('T')[0];
         });
 
-        // --- HISTORY API ---
         window.addEventListener('popstate', (event) => {
             const state = event.state;
             const addModal = document.getElementById('modal-add');
             const detailsModal = document.getElementById('modal-details');
-            
-            if (!addModal.classList.contains('translate-y-full')) {
-                addModal.classList.add('translate-y-full');
-                return;
-            }
-            if (!detailsModal.classList.contains('hidden')) {
-                detailsModal.classList.add('hidden');
-                detailsModal.classList.remove('flex');
-                return;
-            }
-
-            if (state && state.view) {
-                showViewUI(state.view);
-            } else {
-                showViewUI('dashboard');
-            }
+            if (!addModal.classList.contains('translate-y-full')) { addModal.classList.add('translate-y-full'); return; }
+            if (!detailsModal.classList.contains('hidden')) { detailsModal.classList.add('hidden'); detailsModal.classList.remove('flex'); return; }
+            if (state && state.view) showViewUI(state.view); else showViewUI('dashboard');
         });
 
         function goBack() { window.history.back(); }
+        function loadData() { const saved = localStorage.getItem(STORAGE_KEY); if (saved) appData = JSON.parse(saved); }
+        function saveData() { localStorage.setItem(STORAGE_KEY, JSON.stringify(appData)); renderDashboard(); }
+        
+        function setFilter(period) {
+            currentFilter = period;
+            
+            // Actualizar UI chips
+            document.querySelectorAll('.filter-chip').forEach(btn => {
+                btn.classList.remove('bg-primary', 'text-black', 'border-primary');
+                btn.classList.add('bg-surface-dark', 'text-gray-400', 'border-white/5');
+            });
+            const activeBtn = document.getElementById(`filter-${period}`);
+            activeBtn.classList.remove('bg-surface-dark', 'text-gray-400', 'border-white/5');
+            activeBtn.classList.add('bg-primary', 'text-black', 'border-primary');
 
-        // --- DATA ---
-        function loadData() {
-            const saved = localStorage.getItem(STORAGE_KEY);
-            if (saved) appData = JSON.parse(saved);
+            // Actualizar etiquetas
+            const labels = {
+                '1W': 'Última Semana', '1M': 'Último Mes', '3M': 'Últimos 3 Meses', 
+                '6M': 'Últimos 6 Meses', '1Y': 'Último Año', 'ALL': 'Histórico'
+            };
+            document.getElementById('period-label-text').innerText = labels[period];
+            document.getElementById('spent-period-label').innerText = period === 'ALL' ? 'Total' : period;
+
+            renderDashboard();
         }
 
-        function saveData() {
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(appData));
-            renderDashboard(); 
+        function filterDataByPeriod(data) {
+            if (currentFilter === 'ALL') return data;
+            
+            const now = new Date();
+            const past = new Date();
+            
+            if (currentFilter === '1W') past.setDate(now.getDate() - 7);
+            if (currentFilter === '1M') past.setMonth(now.getMonth() - 1);
+            if (currentFilter === '3M') past.setMonth(now.getMonth() - 3);
+            if (currentFilter === '6M') past.setMonth(now.getMonth() - 6);
+            if (currentFilter === '1Y') past.setFullYear(now.getFullYear() - 1);
+
+            return data.filter(item => new Date(item.date) >= past);
         }
 
-        function deleteAllData() {
-            if(confirm("¿Borrar todos los datos permanentemente?")) {
-                localStorage.removeItem(STORAGE_KEY);
-                location.reload();
-            }
-        }
-
-        function saveSettings() {
-            const initOdo = parseFloat(document.getElementById('setting-initial-odo').value);
-            const servOdo = parseFloat(document.getElementById('setting-service-odo').value);
-            if (!isNaN(initOdo)) appData.settings.initialOdometer = initOdo;
-            if (!isNaN(servOdo)) appData.settings.nextServiceKm = servOdo;
-            saveData();
-            alert("Ajustes guardados");
-        }
-
-        // --- CÁLCULOS ---
         function calculateStats(refill, prevRefillOrInitOdo) {
             const pricePerL = refill.cost / refill.volume;
-            let kmPerL = 0;
-            let distance = 0;
+            let kmPerL = 0, distance = 0;
             if (prevRefillOrInitOdo !== null) {
                 distance = refill.odometer - prevRefillOrInitOdo;
                 if (distance > 0 && refill.volume > 0) kmPerL = distance / refill.volume;
@@ -483,44 +519,99 @@
             }).reverse(); 
         }
 
-        // --- UI ---
+        // --- DASHBOARD ---
         function renderDashboard() {
-            const historyList = getFullHistoryCalculated();
-            const validEfficiencies = historyList.filter(h => h.kmPerL > 0);
-            const avgEff = validEfficiencies.length ? (validEfficiencies.reduce((acc, curr) => acc + curr.kmPerL, 0) / validEfficiencies.length) : 0;
+            const fullHistory = getFullHistoryCalculated();
+            const filteredHistory = filterDataByPeriod(fullHistory);
+            
+            // Gauge (Promedio filtrado)
+            const validEff = filteredHistory.filter(h => h.kmPerL > 0);
+            const avgEff = validEff.length ? (validEff.reduce((acc, curr) => acc + curr.kmPerL, 0) / validEff.length) : 0;
             
             document.getElementById('dash-efficiency-val').innerText = avgEff.toFixed(1);
             const percentage = Math.min((avgEff / 25) * 100, 100); 
             document.getElementById('efficiency-circle').setAttribute('stroke-dasharray', `${percentage}, 100`);
 
-            const totalSpent = historyList.reduce((acc, curr) => acc + curr.cost, 0);
+            // Total Gastado (Filtrado)
+            const totalSpent = filteredHistory.reduce((acc, curr) => acc + curr.cost, 0);
             document.getElementById('dash-total-spent').innerText = `$${totalSpent.toLocaleString()}`;
 
-            if (historyList.length > 0) {
-                document.getElementById('dash-last-price').innerText = historyList[0].pricePerL.toFixed(2);
+            // Último precio (Global, siempre el último registro)
+            if (fullHistory.length > 0) {
+                document.getElementById('dash-last-price').innerText = fullHistory[0].pricePerL.toFixed(2);
             }
 
-            const currentOdo = historyList.length > 0 ? historyList[0].odometer : appData.settings.initialOdometer;
+            // Mantenimiento
+            const currentOdo = fullHistory.length > 0 ? fullHistory[0].odometer : appData.settings.initialOdometer;
             const alertEl = document.getElementById('maintenance-alert');
             if (appData.settings.nextServiceKm > 0 && currentOdo >= appData.settings.nextServiceKm) {
                 alertEl.classList.remove('hidden');
-                alertEl.innerText = `⚠️ Mantenimiento: ${appData.settings.nextServiceKm}km alcanzados`;
+                alertEl.innerText = `⚠️ Mantenimiento: ${appData.settings.nextServiceKm}km`;
             } else {
                 alertEl.classList.add('hidden');
             }
 
+            // Lista Reciente (Filtrada - Compacta v1.2)
             const listEl = document.getElementById('dash-recent-list');
             listEl.innerHTML = '';
-            historyList.slice(0, 3).forEach(item => {
-                listEl.innerHTML += createListItem(item);
-            });
+            if (filteredHistory.length === 0) {
+                listEl.innerHTML = '<p class="text-center text-gray-500 py-4 text-xs">No hay registros en este periodo.</p>';
+            } else {
+                filteredHistory.slice(0, 5).forEach(item => listEl.innerHTML += createDashboardListItem(item));
+            }
         }
 
-        function createListItem(item) {
-            // Fecha manual para evitar desfases de zona horaria con date string
+        // LISTA COMPACTA (Dashboard)
+        function createDashboardListItem(item) {
+            const parts = item.date.split('-');
+            const dateStr = `${parts[2]}/${parts[1]}`; 
+            const typeColor = item.type === 'Premium' ? 'text-red-500' : 'text-primary';
+
+            return `
+            <div onclick="openDetailsModal(${item.id})" class="flex items-center gap-4 bg-card-dark p-3 rounded-xl shadow-sm border border-white/5 active:scale-95 transition-transform cursor-pointer">
+                <div class="flex items-center justify-center rounded-xl bg-[#2A3830] shrink-0 size-10 ${typeColor}">
+                    <span class="material-symbols-outlined text-[20px]">local_gas_station</span>
+                </div>
+                <div class="flex flex-col flex-1 min-w-0">
+                    <div class="flex justify-between items-baseline">
+                        <p class="text-white text-sm font-bold truncate">${item.location || 'Gasolinera'}</p>
+                        <p class="text-white text-sm font-bold">$${item.cost}</p>
+                    </div>
+                    <div class="flex justify-between items-center mt-0.5">
+                        <p class="text-gray-400 text-xs font-medium truncate">${dateStr} • ${item.volume}L</p>
+                        <p class="text-primary text-xs font-bold">${item.kmPerL > 0 ? item.kmPerL.toFixed(1) + ' km/l' : '--'}</p>
+                    </div>
+                </div>
+            </div>`;
+        }
+
+        // --- HISTORIAL ---
+        function renderHistory() {
+            const historyList = getFullHistoryCalculated();
+            const container = document.getElementById('history-container');
+            container.innerHTML = '';
+            
+            const groups = {};
+            historyList.forEach(item => {
+                const parts = item.date.split('-');
+                const dateObj = new Date(parts[0], parts[1]-1, parts[2]); 
+                const key = dateObj.toLocaleString('es-MX', { month: 'long', year: 'numeric' });
+                if (!groups[key]) groups[key] = [];
+                groups[key].push(item);
+            });
+
+            for (const [month, items] of Object.entries(groups)) {
+                let html = `<div class="mb-2"><h3 class="text-gray-500 text-[10px] font-bold uppercase tracking-wider mb-2 sticky top-0 bg-background-dark py-2 z-10">${month}</h3><div class="flex flex-col gap-3">`;
+                items.forEach(item => html += createHistoryListItem(item));
+                html += `</div></div>`;
+                container.innerHTML += html;
+            }
+        }
+
+        // LISTA DETALLADA (Historial)
+        function createHistoryListItem(item) {
             const parts = item.date.split('-');
             const dateStr = `${parts[2]}/${parts[1]}/${parts[0]}`; 
-            
             const typeColor = item.type === 'Premium' ? 'text-red-500' : 'text-primary';
 
             return `
@@ -545,80 +636,77 @@
             </div>`;
         }
 
-        function renderHistory() {
-            const historyList = getFullHistoryCalculated();
-            const container = document.getElementById('history-container');
-            container.innerHTML = '';
-            
-            const groups = {};
-            historyList.forEach(item => {
-                const parts = item.date.split('-');
-                const dateObj = new Date(parts[0], parts[1]-1, parts[2]); // Constructor seguro
-                const key = dateObj.toLocaleString('es-MX', { month: 'long', year: 'numeric' });
-                if (!groups[key]) groups[key] = [];
-                groups[key].push(item);
-            });
-
-            for (const [month, items] of Object.entries(groups)) {
-                let html = `<div class="mb-2"><h3 class="text-gray-500 text-[10px] font-bold uppercase tracking-wider mb-2 sticky top-0 bg-background-dark py-2 z-10">${month}</h3><div class="flex flex-col gap-3">`;
-                items.forEach(item => {
-                    html += createListItem(item);
-                });
-                html += `</div></div>`;
-                container.innerHTML += html;
-            }
-        }
-
+        // --- REPORTES (STATS REDISEÑADAS) ---
         function renderStats() {
             const historyList = getFullHistoryCalculated().reverse();
             const valid = historyList.filter(h => h.kmPerL > 0);
             
-            if (valid.length === 0) return;
-
-            const max = Math.max(...valid.map(h => h.kmPerL));
-            const min = Math.min(...valid.map(h => h.kmPerL));
-            const avg = valid.reduce((a,b)=>a+b.kmPerL,0) / valid.length;
-
-            document.getElementById('stats-best').innerText = max.toFixed(1) + ' km/l';
-            document.getElementById('stats-worst').innerText = min.toFixed(1) + ' km/l';
-            document.getElementById('stats-avg-eff').innerHTML = `${avg.toFixed(1)} <span class="text-sm font-semibold text-slate-400">km/l</span>`;
-
+            // Gráfica
             const ctx = document.getElementById('efficiencyChart').getContext('2d');
             if (efficiencyChartInstance) efficiencyChartInstance.destroy();
-            const gradient = ctx.createLinearGradient(0, 0, 0, 400);
-            gradient.addColorStop(0, 'rgba(25, 230, 94, 0.5)');
-            gradient.addColorStop(1, 'rgba(25, 230, 94, 0.0)');
+            
+            if (valid.length > 0) {
+                const gradient = ctx.createLinearGradient(0, 0, 0, 400);
+                gradient.addColorStop(0, 'rgba(25, 230, 94, 0.5)');
+                gradient.addColorStop(1, 'rgba(25, 230, 94, 0.0)');
 
-            efficiencyChartInstance = new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: valid.map(h => {
-                         const parts = h.date.split('-');
-                         return `${parts[2]}/${parts[1]}`;
-                    }),
-                    datasets: [{
-                        label: 'Eficiencia',
-                        data: valid.map(h => h.kmPerL),
-                        borderColor: '#19e65e',
-                        backgroundColor: gradient,
-                        borderWidth: 2,
-                        pointBackgroundColor: '#112116',
-                        pointBorderColor: '#19e65e',
-                        pointBorderWidth: 2,
-                        tension: 0.4,
-                        fill: true
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: { legend: { display: false } },
-                    scales: {
-                        x: { grid: { display: false }, ticks: { color: '#666', font: {size: 10} } },
-                        y: { grid: { color: '#333' }, ticks: { color: '#666', font: {size: 10} } }
+                efficiencyChartInstance = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: valid.map(h => { const p = h.date.split('-'); return `${p[2]}/${p[1]}`; }),
+                        datasets: [{
+                            label: 'Eficiencia',
+                            data: valid.map(h => h.kmPerL),
+                            borderColor: '#19e65e',
+                            backgroundColor: gradient,
+                            borderWidth: 2,
+                            pointBackgroundColor: '#112116',
+                            pointBorderColor: '#19e65e',
+                            tension: 0.4,
+                            fill: true
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: { legend: { display: false } },
+                        scales: {
+                            x: { grid: { display: false }, ticks: { color: '#666', font: {size: 10} } },
+                            y: { grid: { color: '#333' }, ticks: { color: '#666', font: {size: 10} } }
+                        }
                     }
-                }
-            });
+                });
+            }
+
+            // Tarjetas de Reporte (Bento Grid)
+            if (valid.length === 0) return;
+
+            // Mejor
+            const best = valid.reduce((prev, current) => (prev.kmPerL > current.kmPerL) ? prev : current);
+            document.getElementById('stats-best').innerText = best.kmPerL.toFixed(1) + ' km/l';
+            document.getElementById('stats-best-date').innerText = formatDateShort(best.date);
+
+            // Peor
+            const worst = valid.reduce((prev, current) => (prev.kmPerL < current.kmPerL) ? prev : current);
+            document.getElementById('stats-worst').innerText = worst.kmPerL.toFixed(1) + ' km/l';
+            document.getElementById('stats-worst-date').innerText = formatDateShort(worst.date);
+
+            // Precio Promedio
+            const avgPrice = historyList.reduce((acc, curr) => acc + curr.pricePerL, 0) / historyList.length;
+            document.getElementById('stats-avg-price').innerText = '$' + avgPrice.toFixed(2);
+
+            // Costo Total
+            const totalCost = historyList.reduce((acc, curr) => acc + curr.cost, 0);
+            document.getElementById('stats-total-cost').innerText = '$' + totalCost.toLocaleString();
+
+            // Avg Eff (Header Chart)
+            const avgEff = valid.reduce((a,b)=>a+b.kmPerL,0) / valid.length;
+            document.getElementById('stats-avg-eff').innerHTML = `${avgEff.toFixed(1)} <span class="text-sm font-semibold text-slate-400">km/l</span>`;
+        }
+
+        function formatDateShort(dateString) {
+            const parts = dateString.split('-');
+            return `${parts[2]}/${parts[1]}/${parts[0]}`;
         }
 
         function switchView(viewName) {
@@ -647,20 +735,11 @@
         function openAddModal() {
             history.pushState({modal: 'add'}, 'Add Refill', '');
             document.getElementById('modal-add').classList.remove('translate-y-full');
-            
             document.getElementById('input-odo').value = ''; 
-            
-            // HINT LOGIC: Obtener el odómetro más alto registrado
             const lastOdo = appData.refills.length > 0 
                 ? Math.max(...appData.refills.map(r => r.odometer)) 
                 : appData.settings.initialOdometer;
-            
-            // Si hay un dato previo, ponerlo en el placeholder
-            if (lastOdo > 0) {
-                 document.getElementById('input-odo').placeholder = lastOdo.toString();
-            } else {
-                 document.getElementById('input-odo').placeholder = "0";
-            }
+            document.getElementById('input-odo').placeholder = lastOdo > 0 ? lastOdo.toString() : "0";
         }
 
         function openDetailsModal(id) {
@@ -671,11 +750,9 @@
             history.pushState({modal: 'details'}, 'Details', '');
 
             document.getElementById('detail-location').innerText = item.location || 'Gasolinera';
-            
             const parts = item.date.split('-');
             const dateStr = `${parts[2]} de ${new Date(parts[0], parts[1]-1, parts[2]).toLocaleString('es-MX', {month:'long'})}, ${parts[0]}`;
             document.getElementById('detail-date').innerText = dateStr;
-            
             document.getElementById('detail-cost').innerText = `$${item.cost}`;
             document.getElementById('detail-volume').innerText = `${item.volume} L`;
             document.getElementById('detail-odo').innerText = `${item.odometer} km`;
@@ -683,11 +760,9 @@
             document.getElementById('detail-price').innerText = `$${item.pricePerL.toFixed(2)} / litro`;
             document.getElementById('detail-distance').innerText = item.distance > 0 ? `${item.distance} km` : '--';
             document.getElementById('detail-range').innerText = item.range ? `${item.range} km` : 'No registrado';
-
             const typeEl = document.getElementById('detail-type');
             typeEl.innerText = item.type || 'Regular';
             typeEl.className = `px-2 py-1 rounded text-[10px] font-bold ${item.type === 'Premium' ? 'bg-red-900 text-red-300' : 'bg-green-900 text-green-300'}`;
-
             const noteContainer = document.getElementById('detail-notes-container');
             if (item.notes && item.notes.trim() !== '') {
                 document.getElementById('detail-notes').innerText = item.notes;
@@ -695,7 +770,6 @@
             } else {
                 noteContainer.classList.add('hidden');
             }
-
             const modal = document.getElementById('modal-details');
             modal.classList.remove('hidden');
             modal.classList.add('flex');
@@ -704,36 +778,26 @@
         function closeDetailsModal() { window.history.back(); }
 
         function saveRefill() {
-            const date = document.getElementById('input-date').value; // YYYY-MM-DD
+            const date = document.getElementById('input-date').value;
             const odo = parseFloat(document.getElementById('input-odo').value);
             const vol = parseFloat(document.getElementById('input-vol').value);
             const cost = parseFloat(document.getElementById('input-cost').value);
             const loc = document.getElementById('input-loc').value;
             const type = document.querySelector('input[name="fuelType"]:checked').value;
             const notes = document.getElementById('input-notes').value;
-            const range = document.getElementById('input-range').value; // Opcional
+            const range = document.getElementById('input-range').value;
 
-            if (!date || isNaN(odo) || isNaN(vol) || isNaN(cost)) {
-                alert("Completa fecha, odómetro, litros y costo.");
-                return;
-            }
+            if (!date || isNaN(odo) || isNaN(vol) || isNaN(cost)) { alert("Completa los datos numéricos"); return; }
 
             const newRefill = {
                 id: Date.now(),
-                date: date,
-                odometer: odo,
-                volume: vol,
-                cost: cost,
-                location: loc,
-                type: type,
-                notes: notes,
-                range: range ? parseFloat(range) : null
+                date: date, odometer: odo, volume: vol, cost: cost,
+                location: loc, type: type, notes: notes, range: range ? parseFloat(range) : null
             };
 
             appData.refills.push(newRefill);
             saveData();
             
-            // Limpiar
             document.getElementById('input-odo').value = '';
             document.getElementById('input-vol').value = '';
             document.getElementById('input-cost').value = '';
@@ -745,32 +809,34 @@
             setTimeout(() => alert("Guardado"), 100);
         }
 
+        function deleteAllData() {
+            if(confirm("¿Borrar todo permanentemente?")) {
+                localStorage.removeItem(STORAGE_KEY);
+                location.reload();
+            }
+        }
+        function saveSettings() {
+            const initOdo = parseFloat(document.getElementById('setting-initial-odo').value);
+            const servOdo = parseFloat(document.getElementById('setting-service-odo').value);
+            if (!isNaN(initOdo)) appData.settings.initialOdometer = initOdo;
+            if (!isNaN(servOdo)) appData.settings.nextServiceKm = servOdo;
+            saveData(); alert("Guardado");
+        }
         function exportData() {
             const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(appData));
-            const node = document.createElement('a');
-            node.setAttribute("href", dataStr);
-            node.setAttribute("download", "fuel_backup.json");
-            document.body.appendChild(node);
-            node.click();
-            node.remove();
+            const node = document.createElement('a'); node.setAttribute("href", dataStr);
+            node.setAttribute("download", "fuel_backup.json"); document.body.appendChild(node);
+            node.click(); node.remove();
         }
-
         function importData(input) {
-            const file = input.files[0];
-            if (!file) return;
+            const file = input.files[0]; if (!file) return;
             const reader = new FileReader();
             reader.onload = function(e) {
                 try {
                     const json = JSON.parse(e.target.result);
-                    if (json.refills) {
-                        appData = json;
-                        saveData();
-                        alert("Restaurado");
-                        location.reload();
-                    }
+                    if (json.refills) { appData = json; saveData(); alert("Restaurado"); location.reload(); }
                 } catch (err) { alert("Error"); }
-            };
-            reader.readAsText(file);
+            }; reader.readAsText(file);
         }
     </script>
 </body>
