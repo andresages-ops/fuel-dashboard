@@ -20,6 +20,7 @@
                 extend: {
                     colors: {
                         "primary": "#19e65e",
+                        "danger": "#dc2626", /* Rojo para premium */
                         "background-light": "#f6f8f6",
                         "background-dark": "#112116",
                         "card-light": "#ffffff",
@@ -55,15 +56,23 @@
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         
         /* Estilos del Gauge Circular */
-        .circular-chart { display: block; margin: 0 auto; max-width: 100%; max-height: 250px; }
+        .circular-chart { display: block; margin: 0 auto; max-width: 100%; max-height: 220px; } /* Altura reducida */
         .circle-bg { fill: none; stroke: #2A3830; }
         .circle { fill: none; stroke-width: 2.8; stroke-linecap: round; transition: stroke-dasharray 1s ease-out; }
 
         /* Segmented Control Styles */
         .segmented-control input:checked + label {
-            background-color: #19e65e;
             color: #000;
             font-weight: 700;
+        }
+        /* Color Verde para Regular */
+        #type-regular:checked + label {
+            background-color: #19e65e; 
+        }
+        /* Color Rojo para Premium */
+        #type-premium:checked + label {
+            background-color: #dc2626; /* Red 600 */
+            color: #fff;
         }
     </style>
 </head>
@@ -71,22 +80,16 @@
 <body class="bg-background-light dark:bg-background-dark font-display text-slate-900 dark:text-white transition-colors duration-200 min-h-screen relative">
 
     <div id="view-dashboard" class="view-section active">
-        <header class="sticky top-0 z-30 flex items-center justify-between px-4 py-4 bg-background-dark/95 backdrop-blur-md border-b border-white/5">
-            <div class="w-10"></div>
+        <header class="sticky top-0 z-30 flex items-center justify-center py-3 bg-background-dark/95 backdrop-blur-md border-b border-white/5">
             <div class="flex items-center gap-2">
-                <h1 class="text-lg font-bold tracking-tight text-center">Fuel Dashboard</h1>
-                <span id="version-label" class="text-[10px] font-bold bg-primary/20 text-primary px-1.5 py-0.5 rounded border border-primary/20">v1.1</span>
-            </div>
-            <div class="w-10 flex justify-end">
-                <button onclick="switchView('settings')" class="p-2 rounded-full hover:bg-white/10 transition-colors">
-                    <span class="material-symbols-outlined text-[24px]">settings</span>
-                </button>
+                <h1 class="text-base font-bold tracking-tight text-center">Fuel Dashboard</h1>
+                <span id="version-label" class="text-[9px] font-bold bg-primary/20 text-primary px-1.5 py-0.5 rounded border border-primary/20">v1.2</span>
             </div>
         </header>
 
-        <main class="flex-1 flex flex-col gap-6 p-4 max-w-md mx-auto w-full">
-            <section class="flex flex-col items-center justify-center pt-4">
-                <div class="relative w-64 h-64 flex items-center justify-center">
+        <main class="flex-1 flex flex-col gap-4 p-4 max-w-md mx-auto w-full">
+            <section class="flex flex-col items-center justify-center pt-1">
+                <div class="relative w-56 h-56 flex items-center justify-center">
                     <svg class="circular-chart transform -rotate-90 w-full h-full" viewBox="0 0 36 36">
                         <path class="circle-bg stroke-[3px]" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"></path>
                         <path id="efficiency-circle" class="circle stroke-primary stroke-[3px]" stroke-dasharray="0, 100" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"></path>
@@ -96,109 +99,107 @@
                         <span class="text-sm font-medium text-gray-400 mt-1 uppercase tracking-wider">km/l</span>
                     </div>
                 </div>
-                <div class="text-center -mt-2">
-                    <h2 class="text-lg font-semibold">Eficiencia Promedio</h2>
-                    <p id="maintenance-alert" class="text-xs text-orange-400 font-medium mt-2 hidden bg-orange-900/30 px-3 py-1 rounded-full">
-                        ⚠️ Mantenimiento Requerido
+                <div class="text-center -mt-4">
+                    <h2 class="text-sm font-semibold text-gray-400">Eficiencia Promedio</h2>
+                    <p id="maintenance-alert" class="text-[10px] text-orange-400 font-medium mt-1 hidden bg-orange-900/30 px-2 py-0.5 rounded-full">
+                        ⚠️ Mantenimiento
                     </p>
                 </div>
             </section>
 
-            <section class="grid grid-cols-2 gap-4 w-full">
-                <div class="bg-card-dark rounded-2xl p-5 shadow-sm border border-white/5 flex flex-col gap-2">
+            <section class="grid grid-cols-2 gap-3 w-full">
+                <div class="bg-card-dark rounded-2xl p-4 shadow-sm border border-white/5 flex flex-col gap-1">
                     <div class="flex items-start justify-between">
-                        <span class="p-2 rounded-lg bg-orange-900/30 text-orange-400">
-                            <span class="material-symbols-outlined text-[20px]">payments</span>
+                        <span class="p-1.5 rounded-lg bg-orange-900/30 text-orange-400">
+                            <span class="material-symbols-outlined text-[18px]">payments</span>
                         </span>
                     </div>
                     <div>
-                        <p class="text-sm text-gray-400 font-medium">Gasto Total</p>
-                        <p id="dash-total-spent" class="text-2xl font-bold mt-1">$0</p>
-                        <p class="text-xs text-gray-500 mt-0.5">Histórico</p>
+                        <p class="text-xs text-gray-400 font-medium">Gasto Total</p>
+                        <p id="dash-total-spent" class="text-xl font-bold mt-0.5">$0</p>
                     </div>
                 </div>
-                <div class="bg-card-dark rounded-2xl p-5 shadow-sm border border-white/5 flex flex-col gap-2">
+                <div class="bg-card-dark rounded-2xl p-4 shadow-sm border border-white/5 flex flex-col gap-1">
                     <div class="flex items-start justify-between">
-                        <span class="p-2 rounded-lg bg-blue-900/30 text-blue-400">
-                            <span class="material-symbols-outlined text-[20px]">local_gas_station</span>
+                        <span class="p-1.5 rounded-lg bg-blue-900/30 text-blue-400">
+                            <span class="material-symbols-outlined text-[18px]">local_gas_station</span>
                         </span>
                     </div>
                     <div>
-                        <p class="text-sm text-gray-400 font-medium">Última Carga</p>
-                        <p id="dash-last-price" class="text-2xl font-bold mt-1">--</p>
-                        <p class="text-xs text-gray-500 mt-0.5">$/litro</p>
+                        <p class="text-xs text-gray-400 font-medium">Última Carga</p>
+                        <p id="dash-last-price" class="text-xl font-bold mt-0.5">--</p>
+                        <p class="text-[10px] text-gray-500">$/litro</p>
                     </div>
                 </div>
             </section>
 
-            <section class="w-full">
-                <div class="flex items-center justify-between mb-3 px-1">
-                    <h3 class="text-lg font-bold">Actividad Reciente</h3>
-                    <button onclick="switchView('history')" class="text-sm font-semibold text-primary hover:text-primary/80">Ver Todo</button>
+            <section class="w-full mt-2">
+                <div class="flex items-center justify-between mb-2 px-1">
+                    <h3 class="text-base font-bold">Actividad Reciente</h3>
+                    <button onclick="switchView('history')" class="text-xs font-semibold text-primary hover:text-primary/80">Ver Todo</button>
                 </div>
-                <div id="dash-recent-list" class="flex flex-col gap-3">
-                    <p class="text-center text-gray-500 py-4 text-sm">No hay registros aún.</p>
+                <div id="dash-recent-list" class="flex flex-col gap-2">
+                    <p class="text-center text-gray-500 py-4 text-xs">No hay registros aún.</p>
                 </div>
             </section>
         </main>
         
-        <div class="fixed bottom-24 right-6 z-40">
-            <button onclick="openAddModal()" class="flex items-center gap-2 bg-primary hover:bg-primary/90 text-black font-bold py-4 px-6 rounded-full shadow-lg shadow-primary/30 transform transition hover:scale-105 active:scale-95">
-                <span class="material-symbols-outlined text-[24px]">add</span>
-                <span>Cargar</span>
+        <div class="fixed bottom-24 right-5 z-40">
+            <button onclick="openAddModal()" class="flex items-center gap-2 bg-primary hover:bg-primary/90 text-black font-bold py-3 px-5 rounded-full shadow-lg shadow-primary/30 transform transition hover:scale-105 active:scale-95">
+                <span class="material-symbols-outlined text-[22px]">add</span>
+                <span class="text-sm">Cargar</span>
             </button>
         </div>
     </div>
 
     <div id="view-history" class="view-section">
-        <header class="sticky top-0 z-20 flex items-center justify-between p-4 bg-background-dark/95 backdrop-blur-md border-b border-gray-800/50">
-            <h1 class="text-xl font-bold">Historial</h1>
+        <header class="sticky top-0 z-20 flex items-center justify-center py-3 bg-background-dark/95 backdrop-blur-md border-b border-gray-800/50">
+            <h1 class="text-base font-bold">Historial</h1>
         </header>
-        <div id="history-container" class="flex-1 px-4 pt-4 flex flex-col gap-4">
+        <div id="history-container" class="flex-1 px-4 pt-4 flex flex-col gap-3">
             </div>
     </div>
 
     <div id="view-stats" class="view-section">
-        <header class="sticky top-0 z-20 flex items-center justify-between bg-background-dark/90 px-4 py-4 backdrop-blur-md">
-            <h2 class="text-xl font-bold pl-2">Estadísticas</h2>
+        <header class="sticky top-0 z-20 flex items-center justify-center bg-background-dark/90 py-3 backdrop-blur-md">
+            <h2 class="text-base font-bold">Estadísticas</h2>
         </header>
         
-        <div class="px-4 py-6">
-            <div class="flex flex-col gap-6 rounded-2xl bg-card-dark p-6 shadow-sm border border-transparent mb-6">
+        <div class="px-4 py-4">
+            <div class="flex flex-col gap-4 rounded-2xl bg-card-dark p-5 shadow-sm border border-transparent mb-4">
                 <div class="flex items-start justify-between">
                     <div class="flex flex-col gap-1">
-                        <p class="text-slate-400 text-sm font-medium uppercase tracking-wide">Tendencia de Eficiencia</p>
-                        <h3 id="stats-avg-eff" class="text-3xl font-bold leading-tight">-- <span class="text-lg font-semibold text-slate-400">km/l</span></h3>
+                        <p class="text-slate-400 text-xs font-medium uppercase tracking-wide">Tendencia</p>
+                        <h3 id="stats-avg-eff" class="text-2xl font-bold leading-tight">-- <span class="text-sm font-semibold text-slate-400">km/l</span></h3>
                     </div>
                 </div>
-                <div class="relative h-[250px] w-full">
+                <div class="relative h-[220px] w-full">
                     <canvas id="efficiencyChart"></canvas>
                 </div>
             </div>
 
             <div class="grid grid-cols-2 gap-3">
-                <div class="rounded-xl bg-card-dark p-4 border border-transparent">
-                    <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/20 text-primary mb-3">
-                        <span class="material-symbols-outlined">emoji_events</span>
+                <div class="rounded-xl bg-card-dark p-3 border border-transparent">
+                    <div class="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/20 text-primary mb-2">
+                        <span class="material-symbols-outlined text-[18px]">emoji_events</span>
                     </div>
-                    <p class="text-slate-400 text-xs font-medium">Mejor Rendimiento</p>
-                    <h2 id="stats-best" class="text-white text-lg font-bold">--</h2>
+                    <p class="text-slate-400 text-[10px] font-medium uppercase">Mejor</p>
+                    <h2 id="stats-best" class="text-white text-base font-bold">--</h2>
                 </div>
-                <div class="rounded-xl bg-card-dark p-4 border border-transparent">
-                    <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-orange-500/20 text-orange-500 mb-3">
-                        <span class="material-symbols-outlined">warning</span>
+                <div class="rounded-xl bg-card-dark p-3 border border-transparent">
+                    <div class="flex h-8 w-8 items-center justify-center rounded-lg bg-orange-500/20 text-orange-500 mb-2">
+                        <span class="material-symbols-outlined text-[18px]">warning</span>
                     </div>
-                    <p class="text-slate-400 text-xs font-medium">Peor Rendimiento</p>
-                    <h2 id="stats-worst" class="text-white text-lg font-bold">--</h2>
+                    <p class="text-slate-400 text-[10px] font-medium uppercase">Peor</p>
+                    <h2 id="stats-worst" class="text-white text-base font-bold">--</h2>
                 </div>
             </div>
         </div>
     </div>
 
     <div id="view-settings" class="view-section">
-        <header class="sticky top-0 z-20 flex items-center px-4 py-4 bg-background-dark border-b border-gray-800">
-            <button onclick="goBack()" class="mr-4"><span class="material-symbols-outlined">arrow_back</span></button>
-            <h1 class="text-xl font-bold">Configuración</h1>
+        <header class="sticky top-0 z-20 flex items-center justify-center py-3 bg-background-dark border-b border-gray-800">
+            <h1 class="text-base font-bold">Ajustes</h1>
         </header>
         <main class="p-5 flex flex-col gap-6">
             <section class="flex flex-col gap-2">
@@ -216,13 +217,13 @@
 
             <hr class="border-gray-800 my-2">
 
-            <h3 class="text-lg font-bold text-white">Gestión de Datos</h3>
-            <button onclick="exportData()" class="flex items-center justify-center gap-2 bg-gray-700 text-white font-bold py-3 rounded-xl">
-                <span class="material-symbols-outlined">download</span> Exportar Respaldo (JSON)
+            <h3 class="text-sm font-bold text-white uppercase tracking-wider">Datos</h3>
+            <button onclick="exportData()" class="flex items-center justify-center gap-2 bg-gray-700 text-white font-bold py-3 rounded-xl text-sm">
+                <span class="material-symbols-outlined">download</span> Exportar Respaldo
             </button>
             
             <div class="relative">
-                <button class="flex w-full items-center justify-center gap-2 bg-gray-800 text-white font-bold py-3 rounded-xl border border-gray-700">
+                <button class="flex w-full items-center justify-center gap-2 bg-gray-800 text-white font-bold py-3 rounded-xl border border-gray-700 text-sm">
                     <span class="material-symbols-outlined">upload</span> Restaurar Respaldo
                 </button>
                 <input type="file" id="import-file" onchange="importData(this)" class="absolute inset-0 opacity-0 cursor-pointer">
@@ -230,108 +231,107 @@
 
             <hr class="border-gray-800 my-2">
 
-            <button onclick="deleteAllData()" class="flex items-center justify-center gap-2 bg-red-900/30 text-red-500 border border-red-900 font-bold py-3 rounded-xl mt-2">
+            <button onclick="deleteAllData()" class="flex items-center justify-center gap-2 bg-red-900/20 text-red-500 border border-red-900/50 font-bold py-3 rounded-xl mt-2 text-sm hover:bg-red-900/40 transition-colors">
                 <span class="material-symbols-outlined">delete_forever</span> Borrar Todo
             </button>
-            <p class="text-xs text-center text-gray-600">Esto eliminará todos los registros y configuraciones.</p>
+            <p class="text-[10px] text-center text-gray-600">Esto eliminará todos los registros.</p>
 
         </main>
     </div>
 
     <div id="modal-add" class="fixed inset-0 z-[60] bg-background-dark transform translate-y-full transition-transform duration-300 flex flex-col">
-        <header class="flex items-center justify-between px-4 py-4 pt-8 bg-background-dark border-b border-gray-800">
-            <button onclick="goBack()" class="text-primary text-base font-medium">Cancelar</button>
-            <h1 class="text-lg font-bold tracking-tight">Agregar Carga</h1>
+        <header class="flex items-center justify-between px-4 py-3 bg-background-dark border-b border-gray-800">
+            <button onclick="goBack()" class="text-primary text-sm font-medium">Cancelar</button>
+            <h1 class="text-base font-bold tracking-tight">Agregar Carga</h1>
             <div class="w-10"></div>
         </header>
 
-        <main class="flex-1 flex flex-col gap-6 p-5 overflow-y-auto pb-32">
-            <div class="flex items-center gap-3 bg-surface-dark p-4 rounded-xl border border-gray-800">
-                <div class="flex items-center justify-center size-10 rounded-full bg-primary/10 text-primary">
-                    <span class="material-symbols-outlined text-2xl">calendar_today</span>
+        <main class="flex-1 flex flex-col gap-4 p-5 overflow-y-auto pb-32">
+            <div class="flex items-center gap-3 bg-surface-dark p-3 rounded-xl border border-gray-800">
+                <div class="flex items-center justify-center size-8 rounded-full bg-primary/10 text-primary">
+                    <span class="material-symbols-outlined text-lg">calendar_today</span>
                 </div>
                 <div class="flex flex-col">
-                    <span class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Fecha</span>
-                    <input id="input-date" type="datetime-local" class="bg-transparent text-white font-semibold border-none p-0 focus:ring-0">
+                    <span class="text-[10px] font-semibold text-gray-400 uppercase tracking-wider">Fecha</span>
+                    <input id="input-date" type="datetime-local" class="bg-transparent text-white text-sm font-semibold border-none p-0 focus:ring-0">
                 </div>
             </div>
 
-            <section class="flex flex-col gap-2">
-                <label class="text-xs font-bold text-gray-400 uppercase tracking-wider ml-1">Odómetro Actual</label>
+            <section class="flex flex-col gap-1">
+                <label class="text-[10px] font-bold text-gray-400 uppercase tracking-wider ml-1">Odómetro Actual</label>
                 <div class="relative group">
-                    <input id="input-odo" class="w-full bg-surface-dark border-2 border-transparent focus:border-primary rounded-xl px-4 py-6 text-4xl font-extrabold outline-none text-white transition-all shadow-sm ring-0 focus:ring-0" placeholder="0" type="number"/>
-                    <span class="absolute right-6 top-1/2 -translate-y-1/2 text-lg font-bold text-gray-500 pointer-events-none">km</span>
+                    <input id="input-odo" class="w-full bg-surface-dark border-2 border-transparent focus:border-primary rounded-xl px-4 py-3 text-2xl font-bold outline-none text-white transition-all shadow-sm ring-0 focus:ring-0 placeholder-gray-600" placeholder="0" type="number"/>
+                    <span class="absolute right-4 top-1/2 -translate-y-1/2 text-sm font-bold text-gray-500 pointer-events-none">km</span>
                 </div>
             </section>
 
-             <section class="flex flex-col gap-2">
-                <label class="text-xs font-bold text-gray-400 uppercase tracking-wider ml-1">Tipo de Combustible</label>
+             <section class="flex flex-col gap-1">
                 <div class="segmented-control flex p-1 bg-surface-dark rounded-xl border border-gray-800">
                     <div class="flex-1">
                         <input type="radio" name="fuelType" id="type-regular" value="Regular" class="hidden" checked>
-                        <label for="type-regular" class="flex items-center justify-center w-full py-3 rounded-lg text-gray-400 font-semibold cursor-pointer transition-all">Regular</label>
+                        <label for="type-regular" class="flex items-center justify-center w-full py-2 rounded-lg text-gray-400 text-sm font-semibold cursor-pointer transition-all">Regular</label>
                     </div>
                     <div class="flex-1">
                         <input type="radio" name="fuelType" id="type-premium" value="Premium" class="hidden">
-                        <label for="type-premium" class="flex items-center justify-center w-full py-3 rounded-lg text-gray-400 font-semibold cursor-pointer transition-all">Premium</label>
+                        <label for="type-premium" class="flex items-center justify-center w-full py-2 rounded-lg text-gray-400 text-sm font-semibold cursor-pointer transition-all">Premium</label>
                     </div>
                 </div>
             </section>
 
-            <div class="grid grid-cols-2 gap-4">
-                <section class="flex flex-col gap-2">
-                    <label class="text-xs font-bold text-gray-400 uppercase tracking-wider ml-1">Litros</label>
+            <div class="grid grid-cols-2 gap-3">
+                <section class="flex flex-col gap-1">
+                    <label class="text-[10px] font-bold text-gray-400 uppercase tracking-wider ml-1">Litros</label>
                     <div class="relative">
-                        <input id="input-vol" class="w-full bg-surface-dark border-2 border-transparent focus:border-primary rounded-xl px-4 py-5 text-2xl font-bold outline-none text-white ring-0 focus:ring-0" placeholder="0.0" type="number" step="0.01"/>
-                        <span class="absolute right-4 top-1/2 -translate-y-1/2 text-base font-bold text-gray-500 pointer-events-none">L</span>
+                        <input id="input-vol" class="w-full bg-surface-dark border-2 border-transparent focus:border-primary rounded-xl px-4 py-3 text-xl font-bold outline-none text-white ring-0 focus:ring-0 placeholder-gray-600" placeholder="0.0" type="number" step="0.01"/>
+                        <span class="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-bold text-gray-500 pointer-events-none">L</span>
                     </div>
                 </section>
-                <section class="flex flex-col gap-2">
-                    <label class="text-xs font-bold text-gray-400 uppercase tracking-wider ml-1">Costo Total</label>
+                <section class="flex flex-col gap-1">
+                    <label class="text-[10px] font-bold text-gray-400 uppercase tracking-wider ml-1">Costo</label>
                     <div class="relative">
-                        <span class="absolute left-4 top-1/2 -translate-y-1/2 text-base font-bold text-gray-500 pointer-events-none">$</span>
-                        <input id="input-cost" class="w-full bg-surface-dark border-2 border-transparent focus:border-primary rounded-xl pl-8 pr-4 py-5 text-2xl font-bold outline-none text-white ring-0 focus:ring-0" placeholder="0.00" type="number" step="0.01"/>
+                        <span class="absolute left-3 top-1/2 -translate-y-1/2 text-xs font-bold text-gray-500 pointer-events-none">$</span>
+                        <input id="input-cost" class="w-full bg-surface-dark border-2 border-transparent focus:border-primary rounded-xl pl-6 pr-3 py-3 text-xl font-bold outline-none text-white ring-0 focus:ring-0 placeholder-gray-600" placeholder="0" type="number" step="0.01"/>
                     </div>
                 </section>
             </div>
 
-            <section class="flex flex-col gap-2">
-                <label class="text-xs font-bold text-gray-400 uppercase tracking-wider ml-1">Gasolinera</label>
+            <section class="flex flex-col gap-1">
+                <label class="text-[10px] font-bold text-gray-400 uppercase tracking-wider ml-1">Gasolinera</label>
                 <div class="relative flex items-center w-full bg-surface-dark rounded-xl shadow-sm border-2 border-transparent focus-within:border-primary transition-all">
-                    <div class="pl-4 text-gray-500"><span class="material-symbols-outlined">pin_drop</span></div>
-                    <input id="input-loc" class="w-full bg-transparent border-none rounded-xl px-3 py-4 text-lg font-medium outline-none text-white ring-0 focus:ring-0" placeholder="Nombre del lugar" type="text"/>
+                    <div class="pl-3 text-gray-500"><span class="material-symbols-outlined text-lg">pin_drop</span></div>
+                    <input id="input-loc" class="w-full bg-transparent border-none rounded-xl px-3 py-3 text-base font-medium outline-none text-white ring-0 focus:ring-0 placeholder-gray-600" placeholder="Ubicación" type="text"/>
                 </div>
             </section>
 
-             <section class="flex flex-col gap-2">
-                <label class="text-xs font-bold text-gray-400 uppercase tracking-wider ml-1">Notas</label>
-                <textarea id="input-notes" class="w-full bg-surface-dark border-2 border-transparent focus:border-primary rounded-xl px-4 py-3 text-white outline-none ring-0 focus:ring-0 resize-none h-24" placeholder="Observaciones adicionales..."></textarea>
+             <section class="flex flex-col gap-1">
+                <label class="text-[10px] font-bold text-gray-400 uppercase tracking-wider ml-1">Notas</label>
+                <textarea id="input-notes" class="w-full bg-surface-dark border-2 border-transparent focus:border-primary rounded-xl px-4 py-3 text-white outline-none ring-0 focus:ring-0 resize-none h-20 text-sm placeholder-gray-600" placeholder="Opcional..."></textarea>
             </section>
         </main>
 
-        <div class="absolute bottom-0 left-0 w-full p-5 bg-background-dark pt-4 pb-8 border-t border-gray-800">
-            <button onclick="saveRefill()" class="w-full bg-primary hover:bg-green-400 active:scale-[0.98] transition-all text-background-dark font-display font-bold text-lg py-4 rounded-xl shadow-lg flex items-center justify-center gap-2">
-                <span class="material-symbols-outlined">check</span> Guardar
+        <div class="absolute bottom-0 left-0 w-full p-4 bg-background-dark pt-2 pb-6 border-t border-gray-800">
+            <button onclick="saveRefill()" class="w-full bg-primary hover:bg-green-400 active:scale-[0.98] transition-all text-background-dark font-display font-bold text-base py-3 rounded-xl shadow-lg flex items-center justify-center gap-2">
+                <span class="material-symbols-outlined text-xl">check</span> Guardar
             </button>
         </div>
     </div>
 
     <div id="modal-details" class="fixed inset-0 z-[70] bg-black/80 backdrop-blur-sm hidden items-center justify-center p-4 transition-opacity duration-300">
         <div class="bg-card-dark w-full max-w-md rounded-2xl border border-gray-700 shadow-2xl overflow-hidden transform scale-95 transition-transform duration-200" id="modal-details-card">
-            <div class="bg-surface-dark p-4 border-b border-gray-800 flex justify-between items-center">
-                <h2 class="text-lg font-bold text-white">Detalles de Carga</h2>
+            <div class="bg-surface-dark p-3 border-b border-gray-800 flex justify-between items-center">
+                <h2 class="text-base font-bold text-white">Detalles de Carga</h2>
                 <button onclick="closeDetailsModal()" class="text-gray-400 hover:text-white"><span class="material-symbols-outlined">close</span></button>
             </div>
             <div class="p-6 flex flex-col gap-4">
                 <div class="flex justify-between items-start">
                     <div>
-                        <p id="detail-date" class="text-gray-400 text-sm font-semibold mb-1">--</p>
-                        <h3 id="detail-location" class="text-2xl font-bold text-white leading-tight">--</h3>
-                        <span id="detail-type" class="inline-block mt-2 px-2 py-0.5 rounded text-xs font-bold bg-gray-700 text-gray-300">Regular</span>
+                        <p id="detail-date" class="text-gray-400 text-xs font-semibold mb-1">--</p>
+                        <h3 id="detail-location" class="text-xl font-bold text-white leading-tight">--</h3>
+                        <span id="detail-type" class="inline-block mt-2 px-2 py-0.5 rounded text-[10px] font-bold bg-gray-700 text-gray-300">Regular</span>
                     </div>
                     <div class="text-right">
-                        <p id="detail-cost" class="text-2xl font-bold text-primary">--</p>
-                        <p id="detail-volume" class="text-sm text-gray-400">--</p>
+                        <p id="detail-cost" class="text-xl font-bold text-primary">--</p>
+                        <p id="detail-volume" class="text-xs text-gray-400">--</p>
                     </div>
                 </div>
                 
@@ -339,31 +339,31 @@
                 
                 <div class="grid grid-cols-2 gap-4">
                     <div>
-                        <p class="text-xs text-gray-500 uppercase font-bold">Odómetro</p>
-                        <p id="detail-odo" class="text-lg font-semibold text-white">-- km</p>
+                        <p class="text-[10px] text-gray-500 uppercase font-bold">Odómetro</p>
+                        <p id="detail-odo" class="text-base font-semibold text-white">-- km</p>
                     </div>
                     <div>
-                        <p class="text-xs text-gray-500 uppercase font-bold">Rendimiento</p>
-                        <p id="detail-eff" class="text-lg font-semibold text-white">--</p>
+                        <p class="text-[10px] text-gray-500 uppercase font-bold">Rendimiento</p>
+                        <p id="detail-eff" class="text-base font-semibold text-white">--</p>
                     </div>
                     <div>
-                        <p class="text-xs text-gray-500 uppercase font-bold">Precio/Litro</p>
-                        <p id="detail-price" class="text-lg font-semibold text-white">--</p>
+                        <p class="text-[10px] text-gray-500 uppercase font-bold">Precio/Litro</p>
+                        <p id="detail-price" class="text-base font-semibold text-white">--</p>
                     </div>
                 </div>
 
                 <div id="detail-notes-container" class="mt-2 p-3 bg-surface-dark rounded-lg border border-gray-800">
-                    <p class="text-xs text-gray-500 uppercase font-bold mb-1">Notas</p>
-                    <p id="detail-notes" class="text-sm text-gray-300 italic">--</p>
+                    <p class="text-[10px] text-gray-500 uppercase font-bold mb-1">Notas</p>
+                    <p id="detail-notes" class="text-xs text-gray-300 italic">--</p>
                 </div>
 
-                <button onclick="closeDetailsModal()" class="w-full mt-4 py-3 bg-gray-800 hover:bg-gray-700 rounded-xl font-bold text-white">Cerrar</button>
+                <button onclick="closeDetailsModal()" class="w-full mt-2 py-3 bg-gray-800 hover:bg-gray-700 rounded-xl font-bold text-white text-sm">Cerrar</button>
             </div>
         </div>
     </div>
 
     <nav class="fixed bottom-0 w-full z-30 bg-[#151f19] border-t border-white/5 pb-safe">
-        <div class="flex items-center justify-around h-16 max-w-md mx-auto px-2">
+        <div class="flex items-center justify-around h-16 max-w-md mx-auto px-1">
             <button onclick="switchView('dashboard')" class="nav-btn flex flex-col items-center justify-center w-full h-full gap-1 text-primary active">
                 <span class="material-symbols-outlined text-[24px]">dashboard</span>
                 <span class="text-[10px] font-bold">Inicio</span>
@@ -375,6 +375,10 @@
             <button onclick="switchView('stats')" class="nav-btn flex flex-col items-center justify-center w-full h-full gap-1 text-gray-500 hover:text-white transition-colors">
                 <span class="material-symbols-outlined text-[24px]">insights</span>
                 <span class="text-[10px] font-medium">Reportes</span>
+            </button>
+            <button onclick="switchView('settings')" class="nav-btn flex flex-col items-center justify-center w-full h-full gap-1 text-gray-500 hover:text-white transition-colors">
+                <span class="material-symbols-outlined text-[24px]">settings</span>
+                <span class="text-[10px] font-medium">Ajustes</span>
             </button>
         </div>
     </nav>
@@ -396,17 +400,16 @@
         window.addEventListener('DOMContentLoaded', () => {
             loadData();
             
-            // Reemplazamos el estado inicial del historial para controlar el botón "Atrás"
             history.replaceState({view: 'dashboard'}, 'Dashboard', '');
 
-            // Si es la primera vez, sugerir configuración
+            // Validar primera vez
             if (appData.refills.length === 0 && appData.settings.initialOdometer === 0) {
-                // No forzamos alerta, solo dejamos que el usuario explore, pero marcamos el dashboard
+               // Dejar al usuario
             }
             
             renderDashboard();
 
-            // Setear fecha actual en modal
+            // Setear fecha actual
             const now = new Date();
             now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
             document.getElementById('input-date').value = now.toISOString().slice(0,16);
@@ -416,7 +419,6 @@
         window.addEventListener('popstate', (event) => {
             const state = event.state;
             
-            // Si hay un modal abierto, lo cerramos
             const addModal = document.getElementById('modal-add');
             const detailsModal = document.getElementById('modal-details');
             
@@ -430,11 +432,9 @@
                 return;
             }
 
-            // Navegación entre vistas
             if (state && state.view) {
                 showViewUI(state.view);
             } else {
-                // Fallback a dashboard si no hay estado
                 showViewUI('dashboard');
             }
         });
@@ -475,8 +475,7 @@
             if (!isNaN(servOdo)) appData.settings.nextServiceKm = servOdo;
             
             saveData();
-            alert("Configuración guardada");
-            window.history.back(); // Regresar
+            alert("Ajustes guardados");
         }
 
         // --- LÓGICA DE NEGOCIO (CÁLCULOS) ---
@@ -548,23 +547,23 @@
 
         function createListItem(item) {
             const dateObj = new Date(item.date);
-            const dateStr = dateObj.toLocaleDateString('es-MX', { month: 'short', day: 'numeric' });
+            // AJUSTE SOLICITADO: Solo mostrar fecha, no hora.
+            const dateStr = dateObj.toLocaleDateString('es-MX', { year: 'numeric', month: 'short', day: 'numeric' });
             
-            // Color tag based on type
-            const typeColor = item.type === 'Premium' ? 'text-red-400' : 'text-primary';
+            const typeColor = item.type === 'Premium' ? 'text-red-500' : 'text-primary';
 
             return `
-            <div onclick="openDetailsModal(${item.id})" class="flex items-center gap-4 bg-card-dark p-4 rounded-xl shadow-sm border border-white/5 active:scale-95 transition-transform cursor-pointer">
-                <div class="flex items-center justify-center rounded-xl bg-[#2A3830] shrink-0 size-12 ${typeColor}">
-                    <span class="material-symbols-outlined text-[24px]">local_gas_station</span>
+            <div onclick="openDetailsModal(${item.id})" class="flex items-center gap-4 bg-card-dark p-3 rounded-xl shadow-sm border border-white/5 active:scale-95 transition-transform cursor-pointer">
+                <div class="flex items-center justify-center rounded-xl bg-[#2A3830] shrink-0 size-10 ${typeColor}">
+                    <span class="material-symbols-outlined text-[20px]">local_gas_station</span>
                 </div>
                 <div class="flex flex-col flex-1 min-w-0">
                     <div class="flex justify-between items-baseline">
-                        <p class="text-white text-base font-bold truncate">${item.location || 'Gasolinera'}</p>
-                        <p class="text-white text-base font-bold">$${item.cost}</p>
+                        <p class="text-white text-sm font-bold truncate">${item.location || 'Gasolinera'}</p>
+                        <p class="text-white text-sm font-bold">$${item.cost}</p>
                     </div>
-                    <div class="flex justify-between items-center mt-1">
-                        <p class="text-gray-400 text-sm font-medium truncate">${dateStr} • ${item.volume}L <span class="text-xs opacity-50 ml-1 border border-gray-600 rounded px-1">${item.type || 'Reg'}</span></p>
+                    <div class="flex justify-between items-center mt-0.5">
+                        <p class="text-gray-400 text-xs font-medium truncate">${dateStr} • ${item.volume}L</p>
                         <p class="text-primary text-xs font-bold">${item.kmPerL > 0 ? item.kmPerL.toFixed(1) + ' km/l' : '--'}</p>
                     </div>
                 </div>
@@ -586,7 +585,7 @@
             });
 
             for (const [month, items] of Object.entries(groups)) {
-                let html = `<div class="mb-2"><h3 class="text-gray-500 text-sm font-bold uppercase tracking-wider mb-2 sticky top-0 bg-background-dark py-2 z-10">${month}</h3><div class="flex flex-col gap-3">`;
+                let html = `<div class="mb-2"><h3 class="text-gray-500 text-[10px] font-bold uppercase tracking-wider mb-2 sticky top-0 bg-background-dark py-2 z-10">${month}</h3><div class="flex flex-col gap-2">`;
                 items.forEach(item => {
                     html += createListItem(item);
                 });
@@ -608,7 +607,7 @@
 
             document.getElementById('stats-best').innerText = max.toFixed(1) + ' km/l';
             document.getElementById('stats-worst').innerText = min.toFixed(1) + ' km/l';
-            document.getElementById('stats-avg-eff').innerHTML = `${avg.toFixed(1)} <span class="text-lg font-semibold text-slate-400">km/l</span>`;
+            document.getElementById('stats-avg-eff').innerHTML = `${avg.toFixed(1)} <span class="text-sm font-semibold text-slate-400">km/l</span>`;
 
             const ctx = document.getElementById('efficiencyChart').getContext('2d');
             
@@ -627,7 +626,7 @@
                         data: valid.map(h => h.kmPerL),
                         borderColor: '#19e65e',
                         backgroundColor: gradient,
-                        borderWidth: 3,
+                        borderWidth: 2,
                         pointBackgroundColor: '#112116',
                         pointBorderColor: '#19e65e',
                         pointBorderWidth: 2,
@@ -640,8 +639,8 @@
                     maintainAspectRatio: false,
                     plugins: { legend: { display: false } },
                     scales: {
-                        x: { grid: { display: false }, ticks: { color: '#666' } },
-                        y: { grid: { color: '#333' }, ticks: { color: '#666' } }
+                        x: { grid: { display: false }, ticks: { color: '#666', font: {size: 10} } },
+                        y: { grid: { color: '#333' }, ticks: { color: '#666', font: {size: 10} } }
                     }
                 }
             });
@@ -649,7 +648,6 @@
 
         // --- UI: ACCIONES Y NAVEGACIÓN ---
         function switchView(viewName) {
-            // Push state al historial para que el botón Back funcione
             history.pushState({view: viewName}, viewName, '');
             showViewUI(viewName);
         }
@@ -671,31 +669,24 @@
                 document.getElementById('setting-service-odo').value = appData.settings.nextServiceKm;
             }
 
-            // Navbar
-            const navIndex = viewName === 'dashboard' ? 0 : viewName === 'history' ? 1 : viewName === 'stats' ? 2 : -1;
+            // Navbar (Indices: 0:Home, 1:History, 2:Stats, 3:Settings)
+            const navIndex = viewName === 'dashboard' ? 0 : viewName === 'history' ? 1 : viewName === 'stats' ? 2 : viewName === 'settings' ? 3 : -1;
             if (navIndex >= 0) {
                 document.querySelectorAll('.nav-btn')[navIndex].classList.add('text-primary');
             }
             
-            // Scroll to top
             window.scrollTo(0,0);
         }
 
         function openAddModal() {
-            // Push state para que "Back" cierre el modal
             history.pushState({modal: 'add'}, 'Add Refill', '');
             document.getElementById('modal-add').classList.remove('translate-y-full');
             
-            const lastOdo = appData.refills.length > 0 
-                ? Math.max(...appData.refills.map(r => r.odometer)) 
-                : appData.settings.initialOdometer;
-            document.getElementById('input-odo').value = lastOdo > 0 ? lastOdo : '';
+            // AJUSTE SOLICITADO: Limpiar campo odómetro, no pre-llenar.
+            document.getElementById('input-odo').value = ''; 
         }
 
         function closeAddModal() {
-            // Si venimos del botón cancelar, debemos hacer back al historial para quitar el estado del modal
-            // Pero si venimos del evento popstate (botón físico back), no hacemos back otra vez.
-            // Para simplificar, este botón llamará a history.back()
             window.history.back();
         }
 
@@ -704,10 +695,8 @@
             const item = historyList.find(r => r.id === id);
             if(!item) return;
 
-            // Push state
             history.pushState({modal: 'details'}, 'Details', '');
 
-            // Populate Info
             document.getElementById('detail-location').innerText = item.location || 'Ubicación no registrada';
             const dateObj = new Date(item.date);
             document.getElementById('detail-date').innerText = dateObj.toLocaleDateString('es-MX', {weekday:'long', year:'numeric', month:'long', day:'numeric'}) + ' ' + dateObj.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
@@ -718,12 +707,10 @@
             document.getElementById('detail-eff').innerText = item.kmPerL > 0 ? `${item.kmPerL.toFixed(2)} km/l` : 'N/A';
             document.getElementById('detail-price').innerText = `$${item.pricePerL.toFixed(2)}`;
 
-            // Type
             const typeEl = document.getElementById('detail-type');
             typeEl.innerText = item.type || 'Regular';
-            typeEl.className = `inline-block mt-2 px-2 py-0.5 rounded text-xs font-bold ${item.type === 'Premium' ? 'bg-red-900 text-red-300' : 'bg-green-900 text-green-300'}`;
+            typeEl.className = `inline-block mt-2 px-2 py-0.5 rounded text-[10px] font-bold ${item.type === 'Premium' ? 'bg-red-900 text-red-300' : 'bg-green-900 text-green-300'}`;
 
-            // Notes
             const noteEl = document.getElementById('detail-notes');
             const noteContainer = document.getElementById('detail-notes-container');
             if (item.notes && item.notes.trim() !== '') {
@@ -733,7 +720,6 @@
                 noteContainer.classList.add('hidden');
             }
 
-            // Show UI
             const modal = document.getElementById('modal-details');
             modal.classList.remove('hidden');
             modal.classList.add('flex');
@@ -771,13 +757,14 @@
             appData.refills.push(newRefill);
             saveData();
             
-            // Cerrar modal correctamente limpiando campos
+            // Limpiar campos
+            document.getElementById('input-odo').value = '';
             document.getElementById('input-vol').value = '';
             document.getElementById('input-cost').value = '';
+            document.getElementById('input-loc').value = '';
             document.getElementById('input-notes').value = '';
-            window.history.back(); // Cerrar modal via history
             
-            // Pequeño delay para alerta
+            window.history.back();
             setTimeout(() => alert("Carga guardada"), 100);
         }
 
@@ -813,7 +800,6 @@
             };
             reader.readAsText(file);
         }
-
     </script>
 </body>
 </html>
