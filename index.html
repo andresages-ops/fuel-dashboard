@@ -43,6 +43,7 @@
         .view-section.active { display: flex; flex-direction: column; animation: fadeIn 0.3s ease-in-out; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         
+        /* GAUGE: Eliminada la rotación -90deg para que empiece arriba naturalmente */
         .circular-chart { display: block; margin: 0 auto; max-width: 100%; max-height: 200px; } 
         .circle-bg { fill: none; stroke: #2A3830; }
         .circle { fill: none; stroke-width: 2.8; stroke-linecap: round; transition: stroke-dasharray 1s ease-out; }
@@ -51,23 +52,19 @@
         #type-regular:checked + label { background-color: #19e65e; }
         #type-premium:checked + label { background-color: #ef4444; color: #fff; }
         
-        .custom-select {
-            appearance: none;
-            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%239ca3af' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
-            background-position: right 0.5rem center;
-            background-repeat: no-repeat;
-            background-size: 1.5em 1.5em;
-            padding-right: 2.5rem;
-        }
-
         /* Toast Animation */
         #toast-notification { transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.3s ease; }
         .toast-hidden { transform: translate(-50%, -150%) !important; opacity: 0; pointer-events: none; }
         .toast-visible { transform: translate(-50%, 20px) !important; opacity: 1; }
+
+        /* Custom Dropdown Animation */
+        .dropdown-menu { transform-origin: top right; transition: transform 0.1s ease-out, opacity 0.1s ease-out; }
+        .dropdown-hidden { transform: scale(0.95); opacity: 0; pointer-events: none; }
+        .dropdown-visible { transform: scale(1); opacity: 1; pointer-events: auto; }
     </style>
 </head>
 
-<body class="bg-background-light dark:bg-background-dark font-display text-slate-900 dark:text-white transition-colors duration-200 min-h-screen relative">
+<body class="bg-background-light dark:bg-background-dark font-display text-slate-900 dark:text-white transition-colors duration-200 min-h-screen relative" onclick="closeAllDropdowns(event)">
 
     <div id="toast-notification" class="fixed top-0 left-1/2 z-[100] toast-hidden flex items-center gap-3 bg-[#253329] border border-primary/30 px-5 py-3 rounded-full shadow-2xl shadow-black/50 backdrop-blur-md">
         <span id="toast-icon" class="material-symbols-outlined text-primary">check_circle</span>
@@ -78,23 +75,28 @@
         <header class="sticky top-0 z-30 flex items-center justify-between px-4 py-4 bg-background-dark/95 backdrop-blur-md border-b border-white/5">
             <div class="flex items-center gap-2">
                 <h1 class="text-base font-bold tracking-tight">Fuel Dashboard</h1>
-                <span class="text-[9px] font-bold bg-primary/20 text-primary px-1.5 py-0.5 rounded border border-primary/20">v1.7</span>
+                <span class="text-[9px] font-bold bg-primary/20 text-primary px-1.5 py-0.5 rounded border border-primary/20">v1.8</span>
             </div>
-            <div class="relative">
-                <select id="dash-filter-select" onchange="setFilter('dashboard', this.value)" class="custom-select bg-surface-dark text-white text-xs font-bold py-2 pl-4 pr-8 rounded-full border border-white/10 focus:ring-0 focus:border-primary outline-none">
-                    <option value="1M" selected>Este Mes</option>
-                    <option value="3M">3 Meses</option>
-                    <option value="6M">6 Meses</option>
-                    <option value="1Y">Último Año</option>
-                    <option value="ALL">Todo</option>
-                </select>
+            
+            <div class="relative z-50">
+                <button onclick="toggleDropdown('dash-dropdown', event)" id="dash-filter-btn" class="flex items-center gap-2 bg-surface-dark text-white text-xs font-bold py-2 pl-4 pr-3 rounded-full border border-white/10 hover:border-primary transition-colors">
+                    <span id="dash-label">Este Mes</span>
+                    <span class="material-symbols-outlined text-sm">expand_more</span>
+                </button>
+                <div id="dash-dropdown" class="dropdown-menu dropdown-hidden absolute right-0 mt-2 w-32 bg-[#1c2a21] border border-white/10 rounded-xl shadow-xl overflow-hidden">
+                    <div onclick="selectFilter('dashboard', '1M', 'Este Mes')" class="px-4 py-3 text-xs font-medium text-gray-300 hover:bg-white/5 hover:text-white cursor-pointer border-b border-white/5">Este Mes</div>
+                    <div onclick="selectFilter('dashboard', '3M', '3 Meses')" class="px-4 py-3 text-xs font-medium text-gray-300 hover:bg-white/5 hover:text-white cursor-pointer border-b border-white/5">3 Meses</div>
+                    <div onclick="selectFilter('dashboard', '6M', '6 Meses')" class="px-4 py-3 text-xs font-medium text-gray-300 hover:bg-white/5 hover:text-white cursor-pointer border-b border-white/5">6 Meses</div>
+                    <div onclick="selectFilter('dashboard', '1Y', 'Último Año')" class="px-4 py-3 text-xs font-medium text-gray-300 hover:bg-white/5 hover:text-white cursor-pointer border-b border-white/5">Último Año</div>
+                    <div onclick="selectFilter('dashboard', 'ALL', 'Todo')" class="px-4 py-3 text-xs font-medium text-gray-300 hover:bg-white/5 hover:text-white cursor-pointer">Todo</div>
+                </div>
             </div>
         </header>
 
         <main class="flex-1 flex flex-col gap-4 p-4 max-w-md mx-auto w-full">
             <section class="flex flex-col items-center justify-center pt-2 pb-2">
                 <div class="relative w-52 h-52 flex items-center justify-center mb-2">
-                    <svg class="circular-chart transform -rotate-90 w-full h-full" viewBox="0 0 36 36">
+                    <svg class="circular-chart w-full h-full" viewBox="0 0 36 36">
                         <path class="circle-bg stroke-[3px]" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"></path>
                         <path id="efficiency-circle" class="circle stroke-primary stroke-[3px]" stroke-dasharray="0, 100" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"></path>
                     </svg>
@@ -153,14 +155,19 @@
         <header class="sticky top-0 z-20 flex flex-col bg-background-dark/95 backdrop-blur-md border-b border-gray-800/50">
             <div class="flex items-center justify-between px-4 py-3">
                 <h1 class="text-base font-bold">Historial</h1>
-                <div class="relative">
-                    <select id="hist-filter-select" onchange="setFilter('history', this.value)" class="custom-select bg-surface-dark text-white text-xs font-bold py-2 pl-4 pr-8 rounded-full border border-white/10 focus:ring-0 focus:border-primary outline-none">
-                        <option value="1M">Este Mes</option>
-                        <option value="3M">3 Meses</option>
-                        <option value="6M">6 Meses</option>
-                        <option value="12M">12 Meses</option>
-                        <option value="ALL" selected>Todo</option>
-                    </select>
+                
+                <div class="relative z-50">
+                    <button onclick="toggleDropdown('hist-dropdown', event)" id="hist-filter-btn" class="flex items-center gap-2 bg-surface-dark text-white text-xs font-bold py-2 pl-4 pr-3 rounded-full border border-white/10 hover:border-primary transition-colors">
+                        <span id="hist-label">Todo</span>
+                        <span class="material-symbols-outlined text-sm">expand_more</span>
+                    </button>
+                    <div id="hist-dropdown" class="dropdown-menu dropdown-hidden absolute right-0 mt-2 w-32 bg-[#1c2a21] border border-white/10 rounded-xl shadow-xl overflow-hidden">
+                        <div onclick="selectFilter('history', '1M', 'Este Mes')" class="px-4 py-3 text-xs font-medium text-gray-300 hover:bg-white/5 hover:text-white cursor-pointer border-b border-white/5">Este Mes</div>
+                        <div onclick="selectFilter('history', '3M', '3 Meses')" class="px-4 py-3 text-xs font-medium text-gray-300 hover:bg-white/5 hover:text-white cursor-pointer border-b border-white/5">3 Meses</div>
+                        <div onclick="selectFilter('history', '6M', '6 Meses')" class="px-4 py-3 text-xs font-medium text-gray-300 hover:bg-white/5 hover:text-white cursor-pointer border-b border-white/5">6 Meses</div>
+                        <div onclick="selectFilter('history', '12M', '12 Meses')" class="px-4 py-3 text-xs font-medium text-gray-300 hover:bg-white/5 hover:text-white cursor-pointer border-b border-white/5">12 Meses</div>
+                        <div onclick="selectFilter('history', 'ALL', 'Todo')" class="px-4 py-3 text-xs font-medium text-gray-300 hover:bg-white/5 hover:text-white cursor-pointer">Todo</div>
+                    </div>
                 </div>
             </div>
         </header>
@@ -253,7 +260,7 @@
             <section class="flex flex-col gap-2">
                 <label class="text-xs font-bold text-gray-400 uppercase tracking-wider ml-1">Odómetro Inicial (km)</label>
                 <input id="setting-initial-odo" type="number" class="w-full bg-surface-dark border-2 border-transparent focus:border-primary rounded-xl px-4 py-3 text-white outline-none" placeholder="0">
-                <p class="text-[10px] text-gray-500 px-1">Lectura del auto cuando comenzaste a usar la app.</p>
+                <p class="text-[10px] text-gray-500 px-1">Precaución: Cambiar esto puede afectar cálculos pasados.</p>
             </section>
             
             <hr class="border-gray-800">
@@ -457,8 +464,8 @@
                 <span class="text-[9px] font-medium">Historial</span>
             </button>
 
-            <button onclick="openAddModal()" class="absolute left-1/2 -translate-x-1/2 -top-6 bg-primary hover:bg-green-400 text-black rounded-full size-14 flex items-center justify-center shadow-lg shadow-primary/30 active:scale-95 transition-all z-50 border-4 border-[#151f19]">
-                <span class="material-symbols-outlined text-3xl font-bold">add</span>
+            <button onclick="openAddModal()" class="absolute left-1/2 -translate-x-1/2 -top-6 bg-primary hover:bg-green-400 text-black rounded-full w-16 h-16 flex items-center justify-center shadow-lg shadow-primary/30 active:scale-95 transition-all z-50 border-4 border-[#151f19]">
+                <span class="material-symbols-outlined text-4xl font-bold">add</span>
             </button>
 
             <button onclick="switchView('stats')" class="nav-btn flex flex-col items-center justify-center w-12 gap-1 text-gray-500 hover:text-white transition-colors ml-6">
@@ -492,8 +499,8 @@
         window.addEventListener('DOMContentLoaded', () => {
             loadData();
             history.replaceState({view: 'dashboard'}, 'Dashboard', '');
-            setFilter('dashboard', '1M'); 
-            setFilter('history', 'ALL');
+            setFilter('dashboard', '1M', 'Este Mes'); 
+            setFilter('history', 'ALL', 'Todo');
         });
 
         function showToast(message, type = 'success') {
@@ -550,14 +557,44 @@
             return { due: currentOdo >= nextService, nextServiceKm: nextService };
         }
 
-        function setFilter(context, period) {
+        // --- DROPDOWN LOGIC ---
+        function toggleDropdown(id, event) {
+            event.stopPropagation();
+            const el = document.getElementById(id);
+            // Close others
+            document.querySelectorAll('.dropdown-menu').forEach(d => {
+                if(d.id !== id) {
+                    d.classList.add('dropdown-hidden');
+                    d.classList.remove('dropdown-visible');
+                }
+            });
+            
+            if(el.classList.contains('dropdown-hidden')) {
+                el.classList.remove('dropdown-hidden');
+                el.classList.add('dropdown-visible');
+            } else {
+                el.classList.add('dropdown-hidden');
+                el.classList.remove('dropdown-visible');
+            }
+        }
+        
+        function closeAllDropdowns(event) {
+            document.querySelectorAll('.dropdown-menu').forEach(d => {
+                d.classList.add('dropdown-hidden');
+                d.classList.remove('dropdown-visible');
+            });
+        }
+
+        function selectFilter(context, period, labelText) {
             if (context === 'dashboard') {
                 dashboardFilter = period;
                 const labels = { '1M': 'Mes', '3M': '3 Meses', '6M': '6 Meses', '1Y': 'Año', 'ALL': 'Histórico' };
                 document.getElementById('dash-period-label').innerText = labels[period] || period;
+                document.getElementById('dash-label').innerText = labelText;
                 renderDashboard();
             } else if (context === 'history') {
                 historyFilter = period;
+                document.getElementById('hist-label').innerText = labelText;
                 renderHistory();
             }
         }
@@ -602,8 +639,8 @@
             
             document.getElementById('dash-efficiency-val').innerText = avgEff.toFixed(1);
             
-            // CÁLCULO GAUGE (BASE 20 KM/L)
-            const percentage = Math.min((avgEff / 20) * 100, 100); 
+            // GAUGE CALCULATION (15km/l BASE)
+            const percentage = Math.min((avgEff / 15) * 100, 100); 
             document.getElementById('efficiency-circle').setAttribute('stroke-dasharray', `${percentage}, 100`);
 
             const totalSpent = filteredHistory.reduce((acc, curr) => acc + curr.cost, 0);
@@ -627,7 +664,7 @@
             if (filteredHistory.length === 0) {
                 listEl.innerHTML = '<p class="text-center text-gray-500 py-4 text-xs">No hay registros en este periodo.</p>';
             } else {
-                // LIMITADO A 3 ITEMS
+                // LIMITED TO 3
                 filteredHistory.slice(0, 3).forEach(item => listEl.innerHTML += createDashboardListItem(item));
             }
         }
@@ -914,12 +951,26 @@
             }
         }
         function saveSettings() {
-            const initOdo = parseFloat(document.getElementById('setting-initial-odo').value);
+            const newInitOdo = parseFloat(document.getElementById('setting-initial-odo').value);
             const lastServ = parseFloat(document.getElementById('setting-last-service').value);
             const interval = parseFloat(document.getElementById('setting-interval').value);
-            if (!isNaN(initOdo)) appData.settings.initialOdometer = initOdo;
+            
+            if (isNaN(newInitOdo)) return;
+
+            // DETECTAR CAMBIO Y PREGUNTAR POR CASCADA
+            const oldInitOdo = appData.settings.initialOdometer;
+            if (newInitOdo !== oldInitOdo && appData.refills.length > 0) {
+                const diff = newInitOdo - oldInitOdo;
+                if(confirm(`Has cambiado el odómetro inicial en ${diff > 0 ? '+' : ''}${diff} km.\n\n¿Quieres aplicar esta diferencia a TODOS los registros del historial para mantener las distancias?`)) {
+                    appData.refills.forEach(r => r.odometer += diff);
+                    showToast(`Historial ajustado (${diff} km)`);
+                }
+            }
+
+            appData.settings.initialOdometer = newInitOdo;
             if (!isNaN(lastServ)) appData.settings.lastServiceKm = lastServ;
             if (!isNaN(interval)) appData.settings.serviceInterval = interval;
+            
             saveData(); 
             showToast("Ajustes guardados");
         }
