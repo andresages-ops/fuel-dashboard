@@ -21,6 +21,7 @@
                     colors: {
                         "primary": "#19e65e",
                         "danger": "#ef4444",
+                        "warning": "#eab308", // Amarillo para notas
                         "background-light": "#f6f8f6",
                         "background-dark": "#112116",
                         "card-dark": "#1c2a21",
@@ -43,8 +44,10 @@
         .view-section.active { display: flex; flex-direction: column; animation: fadeIn 0.3s ease-in-out; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         
-        /* GAUGE: Eliminada la rotación -90deg para que empiece arriba naturalmente */
-        .circular-chart { display: block; margin: 0 auto; max-width: 100%; max-height: 200px; } 
+        /* GAUGE: Rotado -90deg para empezar arriba */
+        .circular-chart { display: block; margin: 0 auto; max-width: 100%; max-height: 200px; transform: rotate(-90deg); } 
+        /* Texto dentro del gauge NO rotado (se maneja en div aparte) */
+        
         .circle-bg { fill: none; stroke: #2A3830; }
         .circle { fill: none; stroke-width: 2.8; stroke-linecap: round; transition: stroke-dasharray 1s ease-out; }
 
@@ -52,12 +55,20 @@
         #type-regular:checked + label { background-color: #19e65e; }
         #type-premium:checked + label { background-color: #ef4444; color: #fff; }
         
-        /* Toast Animation */
+        .custom-select {
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%239ca3af' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+            background-position: right 0.5rem center;
+            background-repeat: no-repeat;
+            background-size: 1.5em 1.5em;
+            padding-right: 2.5rem;
+        }
+
+        /* Modal Animations */
         #toast-notification { transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.3s ease; }
         .toast-hidden { transform: translate(-50%, -150%) !important; opacity: 0; pointer-events: none; }
         .toast-visible { transform: translate(-50%, 20px) !important; opacity: 1; }
 
-        /* Custom Dropdown Animation */
         .dropdown-menu { transform-origin: top right; transition: transform 0.1s ease-out, opacity 0.1s ease-out; }
         .dropdown-hidden { transform: scale(0.95); opacity: 0; pointer-events: none; }
         .dropdown-visible { transform: scale(1); opacity: 1; pointer-events: auto; }
@@ -68,14 +79,28 @@
 
     <div id="toast-notification" class="fixed top-0 left-1/2 z-[100] toast-hidden flex items-center gap-3 bg-[#253329] border border-primary/30 px-5 py-3 rounded-full shadow-2xl shadow-black/50 backdrop-blur-md">
         <span id="toast-icon" class="material-symbols-outlined text-primary">check_circle</span>
-        <p id="toast-message" class="text-sm font-bold text-white">Operación Exitosa</p>
+        <p id="toast-message" class="text-sm font-bold text-white">Mensaje</p>
+    </div>
+
+    <div id="modal-confirm" class="fixed inset-0 z-[110] bg-black/80 backdrop-blur-sm hidden items-center justify-center p-6 transition-opacity duration-300">
+        <div class="bg-card-dark w-full max-w-xs rounded-2xl border border-white/10 shadow-2xl p-6 transform scale-100">
+            <div class="flex items-center justify-center w-12 h-12 rounded-full bg-primary/20 text-primary mb-4 mx-auto">
+                <span class="material-symbols-outlined text-2xl">help</span>
+            </div>
+            <h3 class="text-lg font-bold text-center text-white mb-2">Confirmación</h3>
+            <p id="confirm-text" class="text-sm text-gray-400 text-center mb-6">¿Estás seguro?</p>
+            <div class="flex gap-3">
+                <button onclick="closeConfirmModal(false)" class="flex-1 py-3 rounded-xl bg-surface-dark text-gray-300 font-bold text-sm border border-white/5 hover:bg-white/5 transition-colors">Cancelar</button>
+                <button onclick="closeConfirmModal(true)" class="flex-1 py-3 rounded-xl bg-primary text-black font-bold text-sm hover:bg-green-400 transition-colors">Confirmar</button>
+            </div>
+        </div>
     </div>
 
     <div id="view-dashboard" class="view-section active">
         <header class="sticky top-0 z-30 flex items-center justify-between px-4 py-4 bg-background-dark/95 backdrop-blur-md border-b border-white/5">
             <div class="flex items-center gap-2">
                 <h1 class="text-base font-bold tracking-tight">Fuel Dashboard</h1>
-                <span class="text-[9px] font-bold bg-primary/20 text-primary px-1.5 py-0.5 rounded border border-primary/20">v1.8</span>
+                <span class="text-[9px] font-bold bg-primary/20 text-primary px-1.5 py-0.5 rounded border border-primary/20">v1.9</span>
             </div>
             
             <div class="relative z-50">
@@ -83,7 +108,7 @@
                     <span id="dash-label">Este Mes</span>
                     <span class="material-symbols-outlined text-sm">expand_more</span>
                 </button>
-                <div id="dash-dropdown" class="dropdown-menu dropdown-hidden absolute right-0 mt-2 w-32 bg-[#1c2a21] border border-white/10 rounded-xl shadow-xl overflow-hidden">
+                <div id="dash-dropdown" class="dropdown-menu dropdown-hidden absolute right-0 mt-2 w-36 bg-[#1c2a21] border border-white/10 rounded-xl shadow-xl overflow-hidden">
                     <div onclick="selectFilter('dashboard', '1M', 'Este Mes')" class="px-4 py-3 text-xs font-medium text-gray-300 hover:bg-white/5 hover:text-white cursor-pointer border-b border-white/5">Este Mes</div>
                     <div onclick="selectFilter('dashboard', '3M', '3 Meses')" class="px-4 py-3 text-xs font-medium text-gray-300 hover:bg-white/5 hover:text-white cursor-pointer border-b border-white/5">3 Meses</div>
                     <div onclick="selectFilter('dashboard', '6M', '6 Meses')" class="px-4 py-3 text-xs font-medium text-gray-300 hover:bg-white/5 hover:text-white cursor-pointer border-b border-white/5">6 Meses</div>
@@ -100,9 +125,9 @@
                         <path class="circle-bg stroke-[3px]" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"></path>
                         <path id="efficiency-circle" class="circle stroke-primary stroke-[3px]" stroke-dasharray="0, 100" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"></path>
                     </svg>
-                    <div class="absolute inset-0 flex flex-col items-center justify-center z-10">
-                        <span id="dash-efficiency-val" class="text-5xl font-extrabold tracking-tighter">--</span>
-                        <span class="text-sm font-medium text-gray-400 mt-1 uppercase tracking-wider">km/l</span>
+                    <div class="absolute inset-0 flex flex-col items-center justify-center z-10 pb-1">
+                        <span id="dash-efficiency-val" class="text-5xl font-extrabold tracking-tighter leading-none">--</span>
+                        <span class="text-sm font-medium text-gray-400 uppercase tracking-wider mt-1">km/l</span>
                     </div>
                 </div>
                 <div class="text-center">
@@ -145,7 +170,7 @@
                     <button onclick="switchView('history')" class="text-xs font-semibold text-primary hover:text-primary/80">Ver Todo</button>
                 </div>
                 <div id="dash-recent-list" class="flex flex-col gap-2">
-                    <p class="text-center text-gray-500 py-4 text-xs">No hay registros en este periodo.</p>
+                    <p class="text-center text-gray-500 py-4 text-xs">Cargando...</p>
                 </div>
             </section>
         </main>
@@ -161,7 +186,7 @@
                         <span id="hist-label">Todo</span>
                         <span class="material-symbols-outlined text-sm">expand_more</span>
                     </button>
-                    <div id="hist-dropdown" class="dropdown-menu dropdown-hidden absolute right-0 mt-2 w-32 bg-[#1c2a21] border border-white/10 rounded-xl shadow-xl overflow-hidden">
+                    <div id="hist-dropdown" class="dropdown-menu dropdown-hidden absolute right-0 mt-2 w-36 bg-[#1c2a21] border border-white/10 rounded-xl shadow-xl overflow-hidden">
                         <div onclick="selectFilter('history', '1M', 'Este Mes')" class="px-4 py-3 text-xs font-medium text-gray-300 hover:bg-white/5 hover:text-white cursor-pointer border-b border-white/5">Este Mes</div>
                         <div onclick="selectFilter('history', '3M', '3 Meses')" class="px-4 py-3 text-xs font-medium text-gray-300 hover:bg-white/5 hover:text-white cursor-pointer border-b border-white/5">3 Meses</div>
                         <div onclick="selectFilter('history', '6M', '6 Meses')" class="px-4 py-3 text-xs font-medium text-gray-300 hover:bg-white/5 hover:text-white cursor-pointer border-b border-white/5">6 Meses</div>
@@ -173,24 +198,24 @@
         </header>
         
         <div class="flex-1 px-4 pt-4 flex flex-col gap-3">
-            <div class="grid grid-cols-2 gap-3 mb-2">
-                <div class="bg-card-dark p-4 rounded-2xl border border-white/5 flex flex-col gap-1">
+            <div class="grid grid-cols-2 gap-3 mb-1">
+                <div class="bg-card-dark p-3 rounded-2xl border border-white/5 flex flex-col gap-1">
                     <div class="flex items-center gap-2 mb-1">
                         <span class="material-symbols-outlined text-primary text-lg">payments</span>
                         <p class="text-[10px] text-gray-400 font-bold uppercase tracking-wider">Gasto</p>
                     </div>
-                    <p id="hist-summary-spent" class="text-xl font-bold text-white">$0</p>
+                    <p id="hist-summary-spent" class="text-lg font-bold text-white">$0</p>
                 </div>
-                <div class="bg-card-dark p-4 rounded-2xl border border-white/5 flex flex-col gap-1">
+                <div class="bg-card-dark p-3 rounded-2xl border border-white/5 flex flex-col gap-1">
                     <div class="flex items-center gap-2 mb-1">
                         <span class="material-symbols-outlined text-primary text-lg">avg_pace</span>
                         <p class="text-[10px] text-gray-400 font-bold uppercase tracking-wider">Promedio</p>
                     </div>
-                    <p id="hist-summary-eff" class="text-xl font-bold text-white">-- <span class="text-xs text-gray-500 font-normal">km/l</span></p>
+                    <p id="hist-summary-eff" class="text-lg font-bold text-white">-- <span class="text-xs text-gray-500 font-normal">km/l</span></p>
                 </div>
             </div>
 
-            <div id="history-container" class="flex flex-col gap-3">
+            <div id="history-container" class="flex flex-col gap-2">
                 </div>
         </div>
     </div>
@@ -432,21 +457,30 @@
 
                 <div class="bg-surface-dark rounded-xl p-4 border border-white/5 flex flex-col gap-3">
                     <div class="flex justify-between items-center border-b border-white/5 pb-2">
-                        <p class="text-xs text-gray-400">Odómetro</p>
+                        <div class="flex items-center gap-2">
+                            <span class="material-symbols-outlined text-gray-500 text-sm">speed</span>
+                            <p class="text-xs text-gray-400">Odómetro</p>
+                        </div>
                         <p id="detail-odo" class="text-sm font-bold text-white">-- km</p>
                     </div>
                     <div class="flex justify-between items-center border-b border-white/5 pb-2">
-                        <p class="text-xs text-gray-400">Distancia Recorrida</p>
+                        <div class="flex items-center gap-2">
+                            <span class="material-symbols-outlined text-gray-500 text-sm">trip_origin</span>
+                            <p class="text-xs text-gray-400">Distancia Recorrida</p>
+                        </div>
                         <p id="detail-distance" class="text-sm font-bold text-white">-- km</p>
                     </div>
                     <div class="flex justify-between items-center">
-                        <p class="text-xs text-gray-400">Autonomía Restante</p>
+                        <div class="flex items-center gap-2">
+                            <span class="material-symbols-outlined text-gray-500 text-sm">battery_full</span>
+                            <p class="text-xs text-gray-400">Autonomía Restante</p>
+                        </div>
                         <p id="detail-range" class="text-sm font-bold text-white">-- km</p>
                     </div>
                 </div>
 
                 <div id="detail-notes-container" class="bg-surface-dark rounded-xl p-3 border border-white/5 hidden">
-                    <p class="text-[10px] text-yellow-400 uppercase font-bold mb-1">Notas</p>
+                    <p class="text-[10px] text-warning uppercase font-bold mb-1">Notas</p>
                     <p id="detail-notes" class="text-xs text-gray-300 italic">--</p>
                 </div>
             </div>
@@ -492,16 +526,44 @@
         let historyFilter = 'ALL';
         let editingId = null; 
         let viewingId = null;
+        let confirmCallback = null;
 
         const STORAGE_KEY = 'fuel_app_db_v1';
         let efficiencyChartInstance = null;
 
+        // --- INICIALIZACIÓN ---
         window.addEventListener('DOMContentLoaded', () => {
+            initApp();
+        });
+
+        function initApp() {
             loadData();
-            history.replaceState({view: 'dashboard'}, 'Dashboard', '');
+            // Asegurar que el filtro inicial existe y renderizar
             setFilter('dashboard', '1M', 'Este Mes'); 
             setFilter('history', 'ALL', 'Todo');
-        });
+            
+            // Forzar renderizado inicial por si acaso
+            renderDashboard();
+        }
+
+        // --- CUSTOM CONFIRM MODAL ---
+        function showCustomConfirm(text, callback) {
+            document.getElementById('confirm-text').innerText = text;
+            confirmCallback = callback;
+            const modal = document.getElementById('modal-confirm');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        }
+
+        function closeConfirmModal(result) {
+            const modal = document.getElementById('modal-confirm');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+            if (confirmCallback) {
+                if(result) confirmCallback();
+                confirmCallback = null;
+            }
+        }
 
         function showToast(message, type = 'success') {
             const toast = document.getElementById('toast-notification');
@@ -561,28 +623,15 @@
         function toggleDropdown(id, event) {
             event.stopPropagation();
             const el = document.getElementById(id);
-            // Close others
             document.querySelectorAll('.dropdown-menu').forEach(d => {
-                if(d.id !== id) {
-                    d.classList.add('dropdown-hidden');
-                    d.classList.remove('dropdown-visible');
-                }
+                if(d.id !== id) { d.classList.add('dropdown-hidden'); d.classList.remove('dropdown-visible'); }
             });
-            
-            if(el.classList.contains('dropdown-hidden')) {
-                el.classList.remove('dropdown-hidden');
-                el.classList.add('dropdown-visible');
-            } else {
-                el.classList.add('dropdown-hidden');
-                el.classList.remove('dropdown-visible');
-            }
+            if(el.classList.contains('dropdown-hidden')) { el.classList.remove('dropdown-hidden'); el.classList.add('dropdown-visible'); } 
+            else { el.classList.add('dropdown-hidden'); el.classList.remove('dropdown-visible'); }
         }
         
         function closeAllDropdowns(event) {
-            document.querySelectorAll('.dropdown-menu').forEach(d => {
-                d.classList.add('dropdown-hidden');
-                d.classList.remove('dropdown-visible');
-            });
+            document.querySelectorAll('.dropdown-menu').forEach(d => { d.classList.add('dropdown-hidden'); d.classList.remove('dropdown-visible'); });
         }
 
         function selectFilter(context, period, labelText) {
@@ -639,7 +688,7 @@
             
             document.getElementById('dash-efficiency-val').innerText = avgEff.toFixed(1);
             
-            // GAUGE CALCULATION (15km/l BASE)
+            // GAUGE CALCULATION (15km/l BASE = 100%)
             const percentage = Math.min((avgEff / 15) * 100, 100); 
             document.getElementById('efficiency-circle').setAttribute('stroke-dasharray', `${percentage}, 100`);
 
@@ -664,7 +713,6 @@
             if (filteredHistory.length === 0) {
                 listEl.innerHTML = '<p class="text-center text-gray-500 py-4 text-xs">No hay registros en este periodo.</p>';
             } else {
-                // LIMITED TO 3
                 filteredHistory.slice(0, 3).forEach(item => listEl.innerHTML += createDashboardListItem(item));
             }
         }
@@ -716,7 +764,7 @@
             });
 
             for (const [month, items] of Object.entries(groups)) {
-                let html = `<div class="mb-2"><h3 class="text-gray-500 text-[10px] font-bold uppercase tracking-wider mb-2 sticky top-0 bg-background-dark py-2 z-10">${month}</h3><div class="flex flex-col gap-3">`;
+                let html = `<div class="mb-2"><h3 class="text-gray-500 text-[10px] font-bold uppercase tracking-wider mb-2 sticky top-0 bg-background-dark py-2 z-10">${month}</h3><div class="flex flex-col gap-2">`;
                 items.forEach(item => html += createHistoryListItem(item, fullHistory));
                 html += `</div></div>`;
                 container.innerHTML += html;
@@ -737,30 +785,30 @@
             } else if (!prevItem) { trendIcon = 'fiber_manual_record'; trendColor = 'text-gray-600'; }
 
             return `
-            <div onclick="openDetailsModal(${item.id})" class="bg-card-dark p-4 rounded-2xl border border-white/5 active:scale-[0.98] transition-transform cursor-pointer shadow-sm">
-                <div class="flex justify-between items-start mb-3">
+            <div onclick="openDetailsModal(${item.id})" class="bg-card-dark p-3 rounded-2xl border border-white/5 active:scale-[0.98] transition-transform cursor-pointer shadow-sm">
+                <div class="flex justify-between items-start mb-2">
                     <div class="flex gap-3">
-                        <div class="flex items-center justify-center rounded-xl bg-[#2A3830] shrink-0 size-11 ${typeColor}">
-                            <span class="material-symbols-outlined text-[22px]">local_gas_station</span>
+                        <div class="flex items-center justify-center rounded-xl bg-[#2A3830] shrink-0 size-10 ${typeColor}">
+                            <span class="material-symbols-outlined text-[20px]">local_gas_station</span>
                         </div>
                         <div>
-                            <p class="text-white text-base font-bold truncate w-32">${item.location || 'Gasolinera'}</p>
+                            <p class="text-white text-sm font-bold truncate w-32">${item.location || 'Gasolinera'}</p>
                             <p class="text-gray-500 text-xs font-medium">${dateStr}</p>
                         </div>
                     </div>
                     <div class="text-right">
-                        <p class="text-white text-lg font-bold tracking-tight">$${item.cost}</p>
-                        <p class="text-gray-400 text-xs font-medium">${item.volume} L</p>
+                        <p class="text-white text-base font-bold tracking-tight">$${item.cost}</p>
+                        <p class="text-gray-400 text-[10px] font-medium">${item.volume} L</p>
                     </div>
                 </div>
-                <div class="pt-3 border-t border-white/5 flex justify-between items-center">
-                    <div class="flex items-center gap-1.5">
-                        <span class="material-symbols-outlined text-lg ${trendColor}">${trendIcon}</span>
-                        <span class="text-white font-bold text-sm">${item.kmPerL > 0 ? item.kmPerL.toFixed(1) + ' km/l' : '--'}</span>
+                <div class="pt-2 border-t border-white/5 flex justify-between items-center">
+                    <div class="flex items-center gap-1">
+                        <span class="material-symbols-outlined text-base ${trendColor}">${trendIcon}</span>
+                        <span class="text-white font-bold text-xs">${item.kmPerL > 0 ? item.kmPerL.toFixed(1) + ' km/l' : '--'}</span>
                     </div>
                     <div class="flex items-center gap-1 text-gray-500">
-                        <span class="material-symbols-outlined text-sm">attach_money</span>
-                        <span class="text-xs font-medium">$${item.pricePerL.toFixed(2)}/L</span>
+                        <span class="material-symbols-outlined text-xs">attach_money</span>
+                        <span class="text-[10px] font-medium">$${item.pricePerL.toFixed(2)}/L</span>
                     </div>
                 </div>
             </div>`;
@@ -860,27 +908,31 @@
             const item = appData.refills.find(r => r.id === viewingId);
             if (!item) return;
             editingId = viewingId;
+            // IMPORTANTE: Primero obtenemos datos, luego cerramos detalle, luego abrimos modal
             closeDetailsModal();
-            openAddModal(true);
-            document.getElementById('input-date').value = item.date;
-            document.getElementById('input-odo').value = item.odometer;
-            document.getElementById('input-vol').value = item.volume;
-            document.getElementById('input-cost').value = item.cost;
-            document.getElementById('input-loc').value = item.location;
-            document.getElementById('input-notes').value = item.notes;
-            if(item.range) document.getElementById('input-range').value = item.range;
-            const radio = document.querySelector(`input[name="fuelType"][value="${item.type}"]`);
-            if(radio) radio.checked = true;
+            // Timeout pequeño para permitir la animación de cierre antes de abrir
+            setTimeout(() => {
+                openAddModal(true);
+                document.getElementById('input-date').value = item.date;
+                document.getElementById('input-odo').value = item.odometer;
+                document.getElementById('input-vol').value = item.volume;
+                document.getElementById('input-cost').value = item.cost;
+                document.getElementById('input-loc').value = item.location;
+                document.getElementById('input-notes').value = item.notes;
+                if(item.range) document.getElementById('input-range').value = item.range;
+                const radio = document.querySelector(`input[name="fuelType"][value="${item.type}"]`);
+                if(radio) radio.checked = true;
+            }, 100);
         }
 
         function deleteRefill() {
             if (!viewingId) return;
-            if(confirm("¿Eliminar este registro permanentemente?")) {
+            showCustomConfirm("¿Eliminar este registro permanentemente?", () => {
                 appData.refills = appData.refills.filter(r => r.id !== viewingId);
                 saveData();
                 closeDetailsModal();
                 showToast("Registro eliminado", "error");
-            }
+            });
         }
 
         function openDetailsModal(id) {
@@ -945,11 +997,12 @@
         }
 
         function deleteAllData() {
-            if(confirm("¿Borrar todo permanentemente?")) {
+            showCustomConfirm("¿Borrar todo permanentemente?", () => {
                 localStorage.removeItem(STORAGE_KEY);
                 location.reload();
-            }
+            });
         }
+
         function saveSettings() {
             const newInitOdo = parseFloat(document.getElementById('setting-initial-odo').value);
             const lastServ = parseFloat(document.getElementById('setting-last-service').value);
@@ -957,23 +1010,31 @@
             
             if (isNaN(newInitOdo)) return;
 
-            // DETECTAR CAMBIO Y PREGUNTAR POR CASCADA
             const oldInitOdo = appData.settings.initialOdometer;
             if (newInitOdo !== oldInitOdo && appData.refills.length > 0) {
                 const diff = newInitOdo - oldInitOdo;
-                if(confirm(`Has cambiado el odómetro inicial en ${diff > 0 ? '+' : ''}${diff} km.\n\n¿Quieres aplicar esta diferencia a TODOS los registros del historial para mantener las distancias?`)) {
+                showCustomConfirm(`Has cambiado el odómetro inicial.\n\n¿Ajustar también todos los registros históricos (${diff > 0 ? '+' : ''}${diff} km)?`, () => {
                     appData.refills.forEach(r => r.odometer += diff);
-                    showToast(`Historial ajustado (${diff} km)`);
-                }
+                    saveSettingsCommit(newInitOdo, lastServ, interval);
+                    showToast(`Historial ajustado`);
+                });
+                // Si cancela, igual guardamos pero sin ajustar
+                // Pero como es modal, necesitamos lógica dividida. 
+                // Para simplificar V1.9: Si cancela el modal, no guarda NADA.
+                return; 
             }
 
-            appData.settings.initialOdometer = newInitOdo;
+            saveSettingsCommit(newInitOdo, lastServ, interval);
+        }
+
+        function saveSettingsCommit(initOdo, lastServ, interval) {
+            appData.settings.initialOdometer = initOdo;
             if (!isNaN(lastServ)) appData.settings.lastServiceKm = lastServ;
             if (!isNaN(interval)) appData.settings.serviceInterval = interval;
-            
             saveData(); 
             showToast("Ajustes guardados");
         }
+
         function exportData() {
             const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(appData));
             const node = document.createElement('a'); node.setAttribute("href", dataStr);
