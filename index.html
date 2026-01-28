@@ -21,7 +21,7 @@
                     colors: {
                         "primary": "#19e65e",
                         "danger": "#ef4444",
-                        "warning": "#eab308", // Amarillo para notas
+                        "warning": "#eab308", 
                         "background-light": "#f6f8f6",
                         "background-dark": "#112116",
                         "card-dark": "#1c2a21",
@@ -46,7 +46,6 @@
         
         /* GAUGE: Rotado -90deg para empezar arriba */
         .circular-chart { display: block; margin: 0 auto; max-width: 100%; max-height: 200px; transform: rotate(-90deg); } 
-        /* Texto dentro del gauge NO rotado (se maneja en div aparte) */
         
         .circle-bg { fill: none; stroke: #2A3830; }
         .circle { fill: none; stroke-width: 2.8; stroke-linecap: round; transition: stroke-dasharray 1s ease-out; }
@@ -100,7 +99,7 @@
         <header class="sticky top-0 z-30 flex items-center justify-between px-4 py-4 bg-background-dark/95 backdrop-blur-md border-b border-white/5">
             <div class="flex items-center gap-2">
                 <h1 class="text-base font-bold tracking-tight">Fuel Dashboard</h1>
-                <span class="text-[9px] font-bold bg-primary/20 text-primary px-1.5 py-0.5 rounded border border-primary/20">v1.9</span>
+                <span class="text-[9px] font-bold bg-primary/20 text-primary px-1.5 py-0.5 rounded border border-primary/20">v2.0</span>
             </div>
             
             <div class="relative z-50">
@@ -125,9 +124,11 @@
                         <path class="circle-bg stroke-[3px]" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"></path>
                         <path id="efficiency-circle" class="circle stroke-primary stroke-[3px]" stroke-dasharray="0, 100" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"></path>
                     </svg>
-                    <div class="absolute inset-0 flex flex-col items-center justify-center z-10 pb-1">
-                        <span id="dash-efficiency-val" class="text-5xl font-extrabold tracking-tighter leading-none">--</span>
-                        <span class="text-sm font-medium text-gray-400 uppercase tracking-wider mt-1">km/l</span>
+                    <div class="absolute inset-0 flex items-center justify-center z-10">
+                        <span id="dash-efficiency-val" class="text-5xl font-extrabold tracking-tighter leading-none pt-1">--</span>
+                    </div>
+                    <div class="absolute inset-0 flex items-end justify-center z-10 pb-12">
+                        <span class="text-sm font-medium text-gray-400 uppercase tracking-wider">km/l</span>
                     </div>
                 </div>
                 <div class="text-center">
@@ -180,7 +181,6 @@
         <header class="sticky top-0 z-20 flex flex-col bg-background-dark/95 backdrop-blur-md border-b border-gray-800/50">
             <div class="flex items-center justify-between px-4 py-3">
                 <h1 class="text-base font-bold">Historial</h1>
-                
                 <div class="relative z-50">
                     <button onclick="toggleDropdown('hist-dropdown', event)" id="hist-filter-btn" class="flex items-center gap-2 bg-surface-dark text-white text-xs font-bold py-2 pl-4 pr-3 rounded-full border border-white/10 hover:border-primary transition-colors">
                         <span id="hist-label">Todo</span>
@@ -287,9 +287,7 @@
                 <input id="setting-initial-odo" type="number" class="w-full bg-surface-dark border-2 border-transparent focus:border-primary rounded-xl px-4 py-3 text-white outline-none" placeholder="0">
                 <p class="text-[10px] text-gray-500 px-1">Precaución: Cambiar esto puede afectar cálculos pasados.</p>
             </section>
-            
             <hr class="border-gray-800">
-
             <h3 class="text-sm font-bold text-primary">Configuración Mantenimiento</h3>
             <section class="flex flex-col gap-2">
                 <label class="text-xs font-bold text-gray-400 uppercase tracking-wider ml-1">Último Servicio Realizado (km)</label>
@@ -299,11 +297,8 @@
                 <label class="text-xs font-bold text-gray-400 uppercase tracking-wider ml-1">Intervalo de Servicio (km)</label>
                 <input id="setting-interval" type="number" class="w-full bg-surface-dark border-2 border-transparent focus:border-primary rounded-xl px-4 py-3 text-white outline-none" placeholder="Ej. 10000">
             </section>
-
             <button onclick="saveSettings()" class="bg-primary hover:bg-green-400 text-black font-bold py-3 rounded-xl transition-colors">Guardar Cambios</button>
-            
             <hr class="border-gray-800 my-2">
-            
             <button onclick="exportData()" class="flex items-center justify-center gap-2 bg-gray-700 text-white font-bold py-3 rounded-xl text-sm">
                 <span class="material-symbols-outlined">download</span> Exportar Respaldo
             </button>
@@ -411,82 +406,6 @@
         </div>
     </div>
 
-    <div id="modal-details" class="fixed inset-0 z-[70] bg-black/80 backdrop-blur-sm hidden items-center justify-center p-4 transition-opacity duration-300">
-        <div class="bg-card-dark w-full max-w-md rounded-2xl border border-gray-700 shadow-2xl overflow-hidden transform scale-95 transition-transform duration-200 flex flex-col max-h-[90vh]" id="modal-details-card">
-            
-            <div class="bg-surface-dark p-4 border-b border-gray-800 flex justify-between items-start">
-                <div>
-                    <h3 id="detail-location" class="text-xl font-bold text-white leading-tight">--</h3>
-                    <p id="detail-date" class="text-gray-400 text-xs font-semibold mt-1">--</p>
-                </div>
-                <div class="flex items-center gap-2">
-                    <button onclick="editRefill()" class="text-gray-400 hover:text-white bg-white/5 p-2 rounded-full transition-colors"><span class="material-symbols-outlined text-sm">edit</span></button>
-                    <button onclick="deleteRefill()" class="text-red-400 hover:text-red-300 bg-red-900/20 p-2 rounded-full transition-colors"><span class="material-symbols-outlined text-sm">delete</span></button>
-                    <button onclick="closeDetailsModal()" class="text-gray-400 hover:text-white ml-2"><span class="material-symbols-outlined">close</span></button>
-                </div>
-            </div>
-
-            <div class="p-5 flex flex-col gap-4 overflow-y-auto">
-                <div class="bg-surface-highlight rounded-xl p-4 flex justify-between items-center border border-white/5">
-                    <div>
-                        <p class="text-[10px] text-gray-400 uppercase font-bold tracking-wider">Costo Total</p>
-                        <p id="detail-cost" class="text-2xl font-bold text-primary">--</p>
-                    </div>
-                    <div class="text-right">
-                        <span id="detail-type" class="px-2 py-1 rounded text-[10px] font-bold bg-gray-700 text-gray-300">Regular</span>
-                        <p id="detail-price" class="text-xs text-gray-400 mt-1">-- / litro</p>
-                    </div>
-                </div>
-
-                <div class="grid grid-cols-2 gap-3">
-                    <div class="bg-surface-dark p-3 rounded-xl border border-white/5">
-                        <div class="flex items-center gap-2 mb-1">
-                             <span class="material-symbols-outlined text-primary text-base">avg_pace</span>
-                             <p class="text-[10px] text-gray-400 uppercase font-bold">Rendimiento</p>
-                        </div>
-                        <p id="detail-eff" class="text-lg font-bold text-white">--</p>
-                    </div>
-                    <div class="bg-surface-dark p-3 rounded-xl border border-white/5">
-                        <div class="flex items-center gap-2 mb-1">
-                             <span class="material-symbols-outlined text-blue-400 text-base">water_drop</span>
-                             <p class="text-[10px] text-gray-400 uppercase font-bold">Consumo</p>
-                        </div>
-                        <p id="detail-volume" class="text-lg font-bold text-white">-- L</p>
-                    </div>
-                </div>
-
-                <div class="bg-surface-dark rounded-xl p-4 border border-white/5 flex flex-col gap-3">
-                    <div class="flex justify-between items-center border-b border-white/5 pb-2">
-                        <div class="flex items-center gap-2">
-                            <span class="material-symbols-outlined text-gray-500 text-sm">speed</span>
-                            <p class="text-xs text-gray-400">Odómetro</p>
-                        </div>
-                        <p id="detail-odo" class="text-sm font-bold text-white">-- km</p>
-                    </div>
-                    <div class="flex justify-between items-center border-b border-white/5 pb-2">
-                        <div class="flex items-center gap-2">
-                            <span class="material-symbols-outlined text-gray-500 text-sm">trip_origin</span>
-                            <p class="text-xs text-gray-400">Distancia Recorrida</p>
-                        </div>
-                        <p id="detail-distance" class="text-sm font-bold text-white">-- km</p>
-                    </div>
-                    <div class="flex justify-between items-center">
-                        <div class="flex items-center gap-2">
-                            <span class="material-symbols-outlined text-gray-500 text-sm">battery_full</span>
-                            <p class="text-xs text-gray-400">Autonomía Restante</p>
-                        </div>
-                        <p id="detail-range" class="text-sm font-bold text-white">-- km</p>
-                    </div>
-                </div>
-
-                <div id="detail-notes-container" class="bg-surface-dark rounded-xl p-3 border border-white/5 hidden">
-                    <p class="text-[10px] text-warning uppercase font-bold mb-1">Notas</p>
-                    <p id="detail-notes" class="text-xs text-gray-300 italic">--</p>
-                </div>
-            </div>
-        </div>
-    </div>
-
     <nav class="fixed bottom-0 w-full z-30 bg-[#151f19] border-t border-white/5 pb-safe">
         <div class="flex items-center justify-between h-16 max-w-md mx-auto px-4 relative">
             <button onclick="switchView('dashboard')" class="nav-btn flex flex-col items-center justify-center w-12 gap-1 text-primary active">
@@ -531,22 +450,20 @@
         const STORAGE_KEY = 'fuel_app_db_v1';
         let efficiencyChartInstance = null;
 
-        // --- INICIALIZACIÓN ---
+        // --- INICIALIZACIÓN (FIX CARGA) ---
         window.addEventListener('DOMContentLoaded', () => {
             initApp();
         });
 
         function initApp() {
             loadData();
-            // Asegurar que el filtro inicial existe y renderizar
+            // FORZAR RENDERIZADO INICIAL
             setFilter('dashboard', '1M', 'Este Mes'); 
             setFilter('history', 'ALL', 'Todo');
-            
-            // Forzar renderizado inicial por si acaso
-            renderDashboard();
+            switchView('dashboard'); 
         }
 
-        // --- CUSTOM CONFIRM MODAL ---
+        // --- FUNCIONES CORE ---
         function showCustomConfirm(text, callback) {
             document.getElementById('confirm-text').innerText = text;
             confirmCallback = callback;
@@ -619,7 +536,6 @@
             return { due: currentOdo >= nextService, nextServiceKm: nextService };
         }
 
-        // --- DROPDOWN LOGIC ---
         function toggleDropdown(id, event) {
             event.stopPropagation();
             const el = document.getElementById(id);
@@ -688,7 +604,7 @@
             
             document.getElementById('dash-efficiency-val').innerText = avgEff.toFixed(1);
             
-            // GAUGE CALCULATION (15km/l BASE = 100%)
+            // GAUGE CALCULATION (15 KM/L BASE)
             const percentage = Math.min((avgEff / 15) * 100, 100); 
             document.getElementById('efficiency-circle').setAttribute('stroke-dasharray', `${percentage}, 100`);
 
@@ -908,9 +824,8 @@
             const item = appData.refills.find(r => r.id === viewingId);
             if (!item) return;
             editingId = viewingId;
-            // IMPORTANTE: Primero obtenemos datos, luego cerramos detalle, luego abrimos modal
+            // CLOSE DETAILS THEN OPEN EDIT (TIMEOUT FOR ANIMATION)
             closeDetailsModal();
-            // Timeout pequeño para permitir la animación de cierre antes de abrir
             setTimeout(() => {
                 openAddModal(true);
                 document.getElementById('input-date').value = item.date;
@@ -922,7 +837,7 @@
                 if(item.range) document.getElementById('input-range').value = item.range;
                 const radio = document.querySelector(`input[name="fuelType"][value="${item.type}"]`);
                 if(radio) radio.checked = true;
-            }, 100);
+            }, 150);
         }
 
         function deleteRefill() {
@@ -1018,9 +933,6 @@
                     saveSettingsCommit(newInitOdo, lastServ, interval);
                     showToast(`Historial ajustado`);
                 });
-                // Si cancela, igual guardamos pero sin ajustar
-                // Pero como es modal, necesitamos lógica dividida. 
-                // Para simplificar V1.9: Si cancela el modal, no guarda NADA.
                 return; 
             }
 
