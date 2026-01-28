@@ -27,7 +27,7 @@
                     colors: {
                         "primary": "#19e65e",
                         "danger": "#ef4444",
-                        "warning": "#eab308", 
+                        "warning": "#facc15", /* Amarillo brillante */
                         "background-light": "#f6f8f6",
                         "background-dark": "#112116",
                         "card-dark": "#1c2a21",
@@ -54,7 +54,7 @@
         .view-section.active { display: flex; flex-direction: column; animation: fadeIn 0.3s ease-in-out; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         
-        /* GAUGE */
+        /* GAUGE: Rotado -90deg para empezar arriba (12:00) */
         .circular-chart { display: block; margin: 0 auto; max-width: 100%; max-height: 200px; transform: rotate(-90deg); } 
         .circle-bg { fill: none; stroke: #2A3830; }
         .circle { fill: none; stroke-width: 2.8; stroke-linecap: round; transition: stroke-dasharray 1s ease-out; }
@@ -83,21 +83,10 @@
 
         /* Pull to Refresh Indicator */
         #ptr-spinner {
-            position: fixed;
-            top: 15px;
-            left: 50%;
-            transform: translateX(-50%) scale(0);
-            z-index: 200;
-            background: #253329;
-            border: 1px solid #19e65e;
-            border-radius: 50%;
-            padding: 8px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.5);
-            transition: transform 0.1s linear; /* Más rápido para seguimiento */
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            pointer-events: none;
+            position: fixed; top: 15px; left: 50%; transform: translateX(-50%) scale(0); z-index: 200;
+            background: #253329; border: 1px solid #19e65e; border-radius: 50%; padding: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.5); transition: transform 0.1s linear;
+            display: flex; align-items: center; justify-content: center; pointer-events: none;
         }
         .ptr-loading { animation: spin 1s linear infinite; }
         @keyframes spin { 100% { transform: translateX(-50%) rotate(360deg); } }
@@ -106,9 +95,7 @@
 
 <body class="bg-background-light dark:bg-background-dark font-display text-slate-900 dark:text-white transition-colors duration-200 min-h-screen relative" onclick="closeAllDropdowns(event)">
 
-    <div id="ptr-spinner">
-        <span class="material-symbols-outlined text-primary">refresh</span>
-    </div>
+    <div id="ptr-spinner"><span class="material-symbols-outlined text-primary">refresh</span></div>
 
     <div id="toast-notification" class="fixed top-0 left-1/2 z-[100] toast-hidden flex items-center gap-3 bg-[#253329] border border-primary/30 px-5 py-3 rounded-full shadow-2xl shadow-black/50 backdrop-blur-md">
         <span id="toast-icon" class="material-symbols-outlined text-primary">check_circle</span>
@@ -133,7 +120,7 @@
         <header class="sticky top-0 z-30 flex items-center justify-between px-4 py-4 bg-background-dark/95 backdrop-blur-md border-b border-white/5 pt-safe">
             <div class="flex items-center gap-2">
                 <h1 class="text-base font-bold tracking-tight">Fuel Dashboard</h1>
-                <span class="text-[9px] font-bold bg-primary/20 text-primary px-1.5 py-0.5 rounded border border-primary/20">v2.2</span>
+                <span class="text-[9px] font-bold bg-primary/20 text-primary px-1.5 py-0.5 rounded border border-primary/20">v2.2.1</span>
             </div>
             
             <div class="relative z-50">
@@ -460,11 +447,7 @@
                     <h3 id="detail-location" class="text-xl font-bold text-white leading-tight">--</h3>
                     <p id="detail-date" class="text-gray-400 text-xs font-semibold mt-1">--</p>
                 </div>
-                <div class="flex items-center gap-2">
-                    <button onclick="editRefill()" class="text-gray-400 hover:text-white bg-white/5 p-2 rounded-full transition-colors"><span class="material-symbols-outlined text-sm">edit</span></button>
-                    <button onclick="deleteRefill()" class="text-red-400 hover:text-red-300 bg-red-900/20 p-2 rounded-full transition-colors"><span class="material-symbols-outlined text-sm">delete</span></button>
-                    <button onclick="closeDetailsModal()" class="text-gray-400 hover:text-white ml-2"><span class="material-symbols-outlined">close</span></button>
-                </div>
+                <button onclick="closeDetailsModal()" class="text-gray-400 hover:text-white bg-white/5 p-2 rounded-full"><span class="material-symbols-outlined">close</span></button>
             </div>
 
             <div class="p-5 flex flex-col gap-4 overflow-y-auto">
@@ -523,6 +506,15 @@
                 <div id="detail-notes-container" class="bg-surface-dark rounded-xl p-3 border border-white/5 hidden">
                     <p class="text-[10px] text-warning uppercase font-bold mb-1">Notas</p>
                     <p id="detail-notes" class="text-xs text-gray-300 italic">--</p>
+                </div>
+
+                <div class="flex gap-3 mt-2">
+                    <button onclick="editRefill()" class="flex-1 py-3 rounded-xl bg-surface-dark text-white font-bold text-sm border border-white/10 hover:bg-white/5 transition-colors flex items-center justify-center gap-2">
+                        <span class="material-symbols-outlined text-sm">edit</span> Editar
+                    </button>
+                    <button onclick="deleteRefill()" class="flex-1 py-3 rounded-xl bg-red-900/20 text-red-400 font-bold text-sm border border-red-900/30 hover:bg-red-900/30 transition-colors flex items-center justify-center gap-2">
+                        <span class="material-symbols-outlined text-sm">delete</span> Eliminar
+                    </button>
                 </div>
             </div>
         </div>
@@ -796,6 +788,7 @@
             const dateStr = `${parts[2]}/${parts[1]}`; 
             const typeColor = item.type === 'Premium' ? 'text-red-500' : 'text-primary';
 
+            // ATENCIÓN: El onclick debe estar en el div padre
             const div = document.createElement('div');
             div.className = "flex items-center gap-4 bg-card-dark p-3 rounded-xl shadow-sm border border-white/5 active:scale-95 transition-transform cursor-pointer";
             div.onclick = () => openDetailsModal(item.id);
@@ -833,13 +826,10 @@
             const groups = {};
             filtered.forEach(item => {
                 const parts = item.date.split('-');
-                const key = `${parts[1]}/${parts[0]}`; // MM/YYYY grouping key or label
-                // Better label logic
-                const dateObj = new Date(parts[0], parts[1]-1, parts[2]);
-                const niceKey = dateObj.toLocaleString('es-MX', { month: 'long', year: 'numeric' });
-                
-                if (!groups[niceKey]) groups[niceKey] = [];
-                groups[niceKey].push(item);
+                const dateObj = new Date(parts[0], parts[1]-1, parts[2]); 
+                const key = dateObj.toLocaleString('es-MX', { month: 'long', year: 'numeric' });
+                if (!groups[key]) groups[key] = [];
+                groups[key].push(item);
             });
 
             for (const [month, items] of Object.entries(groups)) {
@@ -869,7 +859,8 @@
             
             if (prevItem && prevItem.kmPerL > 0 && item.kmPerL > 0) {
                 if (item.kmPerL > prevItem.kmPerL + 0.1) { trendIcon = 'trending_up'; trendColor = 'text-primary'; } 
-                else if (item.kmPerL < prevItem.kmPerL - 0.1) { trendIcon = 'trending_down'; trendColor = 'text-orange-400'; }
+                else if (item.kmPerL < prevItem.kmPerL - 0.1) { trendIcon = 'trending_down'; trendColor = 'text-warning'; }
+                else { trendIcon = 'trending_flat'; trendColor = 'text-white'; }
             } else if (!prevItem) { trendIcon = 'fiber_manual_record'; trendColor = 'text-gray-600'; }
 
             const div = document.createElement('div');
@@ -894,7 +885,7 @@
                 <div class="pt-2 border-t border-white/5 flex justify-between items-center">
                     <div class="flex items-center gap-1">
                         <span class="material-symbols-outlined text-base ${trendColor}">${trendIcon}</span>
-                        <span class="text-white font-bold text-xs">${item.kmPerL > 0 ? item.kmPerL.toFixed(1) + ' km/l' : '--'}</span>
+                        <span class="${trendColor} font-bold text-xs">${item.kmPerL > 0 ? item.kmPerL.toFixed(1) + ' km/l' : '--'}</span>
                     </div>
                     <div class="flex items-center gap-1 text-gray-500">
                         <span class="material-symbols-outlined text-xs">attach_money</span>
