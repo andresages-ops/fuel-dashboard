@@ -61,27 +61,36 @@
         .segmented-control input:checked + label { color: #000; font-weight: 700; }
         #type-regular:checked + label { background-color: #19e65e; }
         #type-premium:checked + label { background-color: #dc2626; color: #fff; }
+        
+        /* Estilo personalizado para el Select */
+        .custom-select {
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%239ca3af' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+            background-position: right 0.5rem center;
+            background-repeat: no-repeat;
+            background-size: 1.5em 1.5em;
+            padding-right: 2.5rem;
+        }
     </style>
 </head>
 
 <body class="bg-background-light dark:bg-background-dark font-display text-slate-900 dark:text-white transition-colors duration-200 min-h-screen relative">
 
     <div id="view-dashboard" class="view-section active">
-        <header class="sticky top-0 z-30 flex flex-col items-center justify-center pt-3 pb-2 bg-background-dark/95 backdrop-blur-md border-b border-white/5">
-            <div class="flex items-center gap-2 mb-3">
-                <h1 class="text-base font-bold tracking-tight text-center">Fuel Dashboard</h1>
-                <span id="version-label" class="text-[9px] font-bold bg-primary/20 text-primary px-1.5 py-0.5 rounded border border-primary/20">v1.4</span>
+        <header class="sticky top-0 z-30 flex items-center justify-between px-4 py-4 bg-background-dark/95 backdrop-blur-md border-b border-white/5">
+            <div class="flex items-center gap-2">
+                <h1 class="text-base font-bold tracking-tight">Fuel Dashboard</h1>
+                <span class="text-[9px] font-bold bg-primary/20 text-primary px-1.5 py-0.5 rounded border border-primary/20">v1.5</span>
             </div>
             
-            <div class="w-full overflow-x-auto no-scrollbar px-4 pb-2">
-                <div class="flex gap-2 min-w-max">
-                    <button onclick="setFilter('1W')" id="filter-1W" class="filter-chip px-3 py-1.5 rounded-full text-xs font-bold transition-all bg-surface-dark text-gray-400 border border-white/5">1 Sem</button>
-                    <button onclick="setFilter('1M')" id="filter-1M" class="filter-chip px-3 py-1.5 rounded-full text-xs font-bold transition-all bg-primary text-black border border-primary">1 Mes</button>
-                    <button onclick="setFilter('3M')" id="filter-3M" class="filter-chip px-3 py-1.5 rounded-full text-xs font-bold transition-all bg-surface-dark text-gray-400 border border-white/5">3 Meses</button>
-                    <button onclick="setFilter('6M')" id="filter-6M" class="filter-chip px-3 py-1.5 rounded-full text-xs font-bold transition-all bg-surface-dark text-gray-400 border border-white/5">6 Meses</button>
-                    <button onclick="setFilter('1Y')" id="filter-1Y" class="filter-chip px-3 py-1.5 rounded-full text-xs font-bold transition-all bg-surface-dark text-gray-400 border border-white/5">Año</button>
-                    <button onclick="setFilter('ALL')" id="filter-ALL" class="filter-chip px-3 py-1.5 rounded-full text-xs font-bold transition-all bg-surface-dark text-gray-400 border border-white/5">Todo</button>
-                </div>
+            <div class="relative">
+                <select id="dash-filter-select" onchange="setFilter('dashboard', this.value)" class="custom-select bg-surface-dark text-white text-xs font-bold py-2 pl-4 pr-8 rounded-full border border-white/10 focus:ring-0 focus:border-primary outline-none">
+                    <option value="1M" selected>Este Mes</option>
+                    <option value="3M">3 Meses</option>
+                    <option value="6M">6 Meses</option>
+                    <option value="1Y">Último Año</option>
+                    <option value="ALL">Todo</option>
+                </select>
             </div>
         </header>
 
@@ -98,7 +107,7 @@
                     </div>
                 </div>
                 <div class="text-center">
-                    <h2 class="text-sm font-semibold text-gray-400 uppercase tracking-wide">Eficiencia <span id="period-label-text">Mensual</span></h2>
+                    <h2 class="text-sm font-semibold text-gray-400 uppercase tracking-wide">Eficiencia Promedio</h2>
                     <p id="maintenance-alert" class="text-[10px] text-orange-400 font-medium mt-1 hidden bg-orange-900/30 px-2 py-0.5 rounded-full">
                         ⚠️ Mantenimiento
                     </p>
@@ -113,7 +122,7 @@
                         </span>
                     </div>
                     <div>
-                        <p class="text-xs text-gray-400 font-medium">Gasto (<span id="spent-period-label">Mes</span>)</p>
+                        <p class="text-xs text-gray-400 font-medium">Gasto (<span id="dash-period-label">Mes</span>)</p>
                         <p id="dash-total-spent" class="text-xl font-bold mt-0.5">$0</p>
                     </div>
                 </div>
@@ -151,11 +160,42 @@
     </div>
 
     <div id="view-history" class="view-section">
-        <header class="sticky top-0 z-20 flex items-center justify-center py-3 bg-background-dark/95 backdrop-blur-md border-b border-gray-800/50">
-            <h1 class="text-base font-bold">Historial</h1>
-        </header>
-        <div id="history-container" class="flex-1 px-4 pt-4 flex flex-col gap-3">
+        <header class="sticky top-0 z-20 flex flex-col bg-background-dark/95 backdrop-blur-md border-b border-gray-800/50">
+            <div class="flex items-center justify-between px-4 py-3">
+                <h1 class="text-base font-bold">Historial</h1>
+                <div class="relative">
+                    <select id="hist-filter-select" onchange="setFilter('history', this.value)" class="custom-select bg-surface-dark text-white text-xs font-bold py-2 pl-4 pr-8 rounded-full border border-white/10 focus:ring-0 focus:border-primary outline-none">
+                        <option value="1M">Este Mes</option>
+                        <option value="3M">3 Meses</option>
+                        <option value="6M">6 Meses</option>
+                        <option value="12M">12 Meses</option>
+                        <option value="ALL" selected>Todo</option>
+                    </select>
+                </div>
             </div>
+        </header>
+        
+        <div class="flex-1 px-4 pt-4 flex flex-col gap-3">
+            <div class="grid grid-cols-2 gap-3 mb-2">
+                <div class="bg-card-dark p-4 rounded-2xl border border-white/5 flex flex-col gap-1">
+                    <div class="flex items-center gap-2 mb-1">
+                        <span class="material-symbols-outlined text-primary text-lg">payments</span>
+                        <p class="text-[10px] text-gray-400 font-bold uppercase tracking-wider">Gasto</p>
+                    </div>
+                    <p id="hist-summary-spent" class="text-xl font-bold text-white">$0</p>
+                </div>
+                <div class="bg-card-dark p-4 rounded-2xl border border-white/5 flex flex-col gap-1">
+                    <div class="flex items-center gap-2 mb-1">
+                        <span class="material-symbols-outlined text-primary text-lg">avg_pace</span>
+                        <p class="text-[10px] text-gray-400 font-bold uppercase tracking-wider">Promedio</p>
+                    </div>
+                    <p id="hist-summary-eff" class="text-xl font-bold text-white">-- <span class="text-xs text-gray-500 font-normal">km/l</span></p>
+                </div>
+            </div>
+
+            <div id="history-container" class="flex flex-col gap-3">
+                </div>
+        </div>
     </div>
 
     <div id="view-stats" class="view-section">
@@ -166,7 +206,7 @@
             <div class="flex flex-col gap-4 rounded-2xl bg-card-dark p-5 shadow-sm border border-transparent mb-5">
                 <div class="flex items-start justify-between">
                     <div class="flex flex-col gap-1">
-                        <p class="text-slate-400 text-xs font-medium uppercase tracking-wide">Tendencia de Eficiencia</p>
+                        <p class="text-slate-400 text-xs font-medium uppercase tracking-wide">Tendencia</p>
                         <h3 id="stats-avg-eff" class="text-2xl font-bold leading-tight">-- <span class="text-sm font-semibold text-slate-400">km/l</span></h3>
                     </div>
                 </div>
@@ -174,42 +214,37 @@
                     <canvas id="efficiencyChart"></canvas>
                 </div>
             </div>
-
             <div class="grid grid-cols-2 gap-4">
-                
                 <div class="flex flex-col gap-2 rounded-2xl bg-card-dark p-4 border border-white/5">
                     <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/20 text-primary">
                         <span class="material-symbols-outlined">emoji_events</span>
                     </div>
                     <div>
-                        <p class="text-slate-400 text-[10px] font-bold uppercase tracking-wider">Mejor Eficiencia</p>
+                        <p class="text-slate-400 text-[10px] font-bold uppercase tracking-wider">Mejor</p>
                         <h2 id="stats-best" class="text-white text-xl font-bold mt-0.5">--</h2>
                         <p id="stats-best-date" class="text-slate-500 text-[10px] mt-0.5">--</p>
                     </div>
                 </div>
-
                 <div class="flex flex-col gap-2 rounded-2xl bg-card-dark p-4 border border-white/5">
                     <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-orange-500/20 text-orange-500">
                         <span class="material-symbols-outlined">warning</span>
                     </div>
                     <div>
-                        <p class="text-slate-400 text-[10px] font-bold uppercase tracking-wider">Peor Eficiencia</p>
+                        <p class="text-slate-400 text-[10px] font-bold uppercase tracking-wider">Peor</p>
                         <h2 id="stats-worst" class="text-white text-xl font-bold mt-0.5">--</h2>
                         <p id="stats-worst-date" class="text-slate-500 text-[10px] mt-0.5">--</p>
                     </div>
                 </div>
-
                 <div class="flex flex-col gap-2 rounded-2xl bg-card-dark p-4 border border-white/5">
                     <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-500/20 text-blue-400">
                         <span class="material-symbols-outlined">local_gas_station</span>
                     </div>
                     <div>
-                        <p class="text-slate-400 text-[10px] font-bold uppercase tracking-wider">Precio Promedio</p>
+                        <p class="text-slate-400 text-[10px] font-bold uppercase tracking-wider">Precio Prom.</p>
                         <h2 id="stats-avg-price" class="text-white text-xl font-bold mt-0.5">--</h2>
                         <p class="text-slate-500 text-[10px] mt-0.5">Por litro</p>
                     </div>
                 </div>
-
                 <div class="flex flex-col gap-2 rounded-2xl bg-card-dark p-4 border border-white/5">
                     <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-purple-500/20 text-purple-400">
                         <span class="material-symbols-outlined">account_balance_wallet</span>
@@ -220,7 +255,6 @@
                         <p class="text-slate-500 text-[10px] mt-0.5">Histórico</p>
                     </div>
                 </div>
-
             </div>
         </div>
     </div>
@@ -272,7 +306,6 @@
                     <input id="input-date" type="date" class="bg-transparent text-white text-sm font-semibold border-none p-0 focus:ring-0 w-full">
                 </div>
             </div>
-
             <section class="flex flex-col gap-1">
                 <div class="segmented-control flex p-1 bg-surface-dark rounded-xl border border-gray-800">
                     <div class="flex-1">
@@ -285,7 +318,6 @@
                     </div>
                 </div>
             </section>
-
             <section class="flex flex-col gap-1">
                 <label class="text-[10px] font-bold text-gray-400 uppercase tracking-wider ml-1">Odómetro Actual</label>
                 <div class="relative group">
@@ -293,7 +325,6 @@
                     <span class="absolute right-4 top-1/2 -translate-y-1/2 text-sm font-bold text-gray-500 pointer-events-none">km</span>
                 </div>
             </section>
-
              <section class="flex flex-col gap-1">
                 <label class="text-[10px] font-bold text-gray-400 uppercase tracking-wider ml-1">Km Restantes (Autonomía)</label>
                 <div class="relative group">
@@ -301,7 +332,6 @@
                     <span class="absolute right-4 top-1/2 -translate-y-1/2 text-sm font-bold text-gray-500 pointer-events-none">km</span>
                 </div>
             </section>
-
             <div class="grid grid-cols-2 gap-3">
                 <section class="flex flex-col gap-1">
                     <label class="text-[10px] font-bold text-gray-400 uppercase tracking-wider ml-1">Litros</label>
@@ -318,7 +348,6 @@
                     </div>
                 </section>
             </div>
-
             <section class="flex flex-col gap-1">
                 <label class="text-[10px] font-bold text-gray-400 uppercase tracking-wider ml-1">Gasolinera</label>
                 <div class="relative flex items-center w-full bg-surface-dark rounded-xl shadow-sm border-2 border-transparent focus-within:border-primary transition-all">
@@ -326,7 +355,6 @@
                     <input id="input-loc" class="w-full bg-transparent border-none rounded-xl px-3 py-3 text-base font-medium outline-none text-white ring-0 focus:ring-0 placeholder-gray-600" placeholder="Ubicación" type="text"/>
                 </div>
             </section>
-
              <section class="flex flex-col gap-1">
                 <label class="text-[10px] font-bold text-gray-400 uppercase tracking-wider ml-1">Notas</label>
                 <textarea id="input-notes" class="w-full bg-surface-dark border-2 border-transparent focus:border-primary rounded-xl px-4 py-3 text-white outline-none ring-0 focus:ring-0 resize-none h-16 text-sm placeholder-gray-600" placeholder="Opcional..."></textarea>
@@ -431,12 +459,12 @@
     </nav>
 
     <script>
-        // --- ESTADO ---
         let appData = {
             settings: { initialOdometer: 0, nextServiceKm: 0 },
             refills: []
         };
-        let currentFilter = '1M'; // Filtro por defecto: 1 Mes
+        let dashboardFilter = '1M';
+        let historyFilter = 'ALL';
 
         const STORAGE_KEY = 'fuel_app_db_v1';
         let efficiencyChartInstance = null;
@@ -444,7 +472,8 @@
         window.addEventListener('DOMContentLoaded', () => {
             loadData();
             history.replaceState({view: 'dashboard'}, 'Dashboard', '');
-            setFilter('1M'); // Inicializar dashboard con filtro
+            setFilter('dashboard', '1M'); 
+            setFilter('history', 'ALL');
             document.getElementById('input-date').value = new Date().toISOString().split('T')[0];
         });
 
@@ -461,41 +490,26 @@
         function loadData() { const saved = localStorage.getItem(STORAGE_KEY); if (saved) appData = JSON.parse(saved); }
         function saveData() { localStorage.setItem(STORAGE_KEY, JSON.stringify(appData)); renderDashboard(); }
         
-        function setFilter(period) {
-            currentFilter = period;
-            
-            // Actualizar UI chips
-            document.querySelectorAll('.filter-chip').forEach(btn => {
-                btn.classList.remove('bg-primary', 'text-black', 'border-primary');
-                btn.classList.add('bg-surface-dark', 'text-gray-400', 'border-white/5');
-            });
-            const activeBtn = document.getElementById(`filter-${period}`);
-            activeBtn.classList.remove('bg-surface-dark', 'text-gray-400', 'border-white/5');
-            activeBtn.classList.add('bg-primary', 'text-black', 'border-primary');
-
-            // Actualizar etiquetas
-            const labels = {
-                '1W': 'Última Semana', '1M': 'Último Mes', '3M': 'Últimos 3 Meses', 
-                '6M': 'Últimos 6 Meses', '1Y': 'Último Año', 'ALL': 'Histórico'
-            };
-            document.getElementById('period-label-text').innerText = labels[period];
-            document.getElementById('spent-period-label').innerText = period === 'ALL' ? 'Total' : period;
-
-            renderDashboard();
+        function setFilter(context, period) {
+            if (context === 'dashboard') {
+                dashboardFilter = period;
+                const labels = { '1M': 'Mes', '3M': '3 Meses', '6M': '6 Meses', '1Y': 'Año', 'ALL': 'Histórico' };
+                document.getElementById('dash-period-label').innerText = labels[period] || period;
+                renderDashboard();
+            } else if (context === 'history') {
+                historyFilter = period;
+                renderHistory();
+            }
         }
 
-        function filterDataByPeriod(data) {
-            if (currentFilter === 'ALL') return data;
-            
+        function filterDataByPeriod(data, period) {
+            if (period === 'ALL') return data;
             const now = new Date();
             const past = new Date();
-            
-            if (currentFilter === '1W') past.setDate(now.getDate() - 7);
-            if (currentFilter === '1M') past.setMonth(now.getMonth() - 1);
-            if (currentFilter === '3M') past.setMonth(now.getMonth() - 3);
-            if (currentFilter === '6M') past.setMonth(now.getMonth() - 6);
-            if (currentFilter === '1Y') past.setFullYear(now.getFullYear() - 1);
-
+            if (period === '1M') past.setMonth(now.getMonth() - 1);
+            if (period === '3M') past.setMonth(now.getMonth() - 3);
+            if (period === '6M') past.setMonth(now.getMonth() - 6);
+            if (period === '12M' || period === '1Y') past.setFullYear(now.getFullYear() - 1);
             return data.filter(item => new Date(item.date) >= past);
         }
 
@@ -516,15 +530,14 @@
                 const stats = calculateStats(r, prevOdo);
                 prevOdo = r.odometer; 
                 return { ...r, ...stats };
-            }).reverse(); 
+            }).reverse(); // Más reciente primero
         }
 
         // --- DASHBOARD ---
         function renderDashboard() {
             const fullHistory = getFullHistoryCalculated();
-            const filteredHistory = filterDataByPeriod(fullHistory);
+            const filteredHistory = filterDataByPeriod(fullHistory, dashboardFilter);
             
-            // Gauge (Promedio filtrado)
             const validEff = filteredHistory.filter(h => h.kmPerL > 0);
             const avgEff = validEff.length ? (validEff.reduce((acc, curr) => acc + curr.kmPerL, 0) / validEff.length) : 0;
             
@@ -532,16 +545,13 @@
             const percentage = Math.min((avgEff / 25) * 100, 100); 
             document.getElementById('efficiency-circle').setAttribute('stroke-dasharray', `${percentage}, 100`);
 
-            // Total Gastado (Filtrado)
             const totalSpent = filteredHistory.reduce((acc, curr) => acc + curr.cost, 0);
             document.getElementById('dash-total-spent').innerText = `$${totalSpent.toLocaleString()}`;
 
-            // Último precio (Global, siempre el último registro)
             if (fullHistory.length > 0) {
                 document.getElementById('dash-last-price').innerText = fullHistory[0].pricePerL.toFixed(2);
             }
 
-            // Mantenimiento
             const currentOdo = fullHistory.length > 0 ? fullHistory[0].odometer : appData.settings.initialOdometer;
             const alertEl = document.getElementById('maintenance-alert');
             if (appData.settings.nextServiceKm > 0 && currentOdo >= appData.settings.nextServiceKm) {
@@ -551,7 +561,6 @@
                 alertEl.classList.add('hidden');
             }
 
-            // Lista Reciente (Filtrada - Compacta v1.2)
             const listEl = document.getElementById('dash-recent-list');
             listEl.innerHTML = '';
             if (filteredHistory.length === 0) {
@@ -561,7 +570,6 @@
             }
         }
 
-        // LISTA COMPACTA (Dashboard)
         function createDashboardListItem(item) {
             const parts = item.date.split('-');
             const dateStr = `${parts[2]}/${parts[1]}`; 
@@ -587,12 +595,24 @@
 
         // --- HISTORIAL ---
         function renderHistory() {
-            const historyList = getFullHistoryCalculated();
+            const fullHistory = getFullHistoryCalculated();
+            const filtered = filterDataByPeriod(fullHistory, historyFilter);
+            
+            // Actualizar Resumen Historial
+            const totalSpent = filtered.reduce((acc, curr) => acc + curr.cost, 0);
+            const valid = filtered.filter(h => h.kmPerL > 0);
+            const avgEff = valid.length ? (valid.reduce((acc, curr) => acc + curr.kmPerL, 0) / valid.length) : 0;
+            
+            document.getElementById('hist-summary-spent').innerText = `$${totalSpent.toLocaleString()}`;
+            document.getElementById('hist-summary-eff').innerHTML = `${avgEff.toFixed(1)} <span class="text-xs text-gray-500 font-normal">km/l</span>`;
+
+            // Lista
             const container = document.getElementById('history-container');
             container.innerHTML = '';
             
+            // Agrupar (mismo metodo anterior pero con nueva tarjeta)
             const groups = {};
-            historyList.forEach(item => {
+            filtered.forEach(item => {
                 const parts = item.date.split('-');
                 const dateObj = new Date(parts[0], parts[1]-1, parts[2]); 
                 const key = dateObj.toLocaleString('es-MX', { month: 'long', year: 'numeric' });
@@ -602,46 +622,76 @@
 
             for (const [month, items] of Object.entries(groups)) {
                 let html = `<div class="mb-2"><h3 class="text-gray-500 text-[10px] font-bold uppercase tracking-wider mb-2 sticky top-0 bg-background-dark py-2 z-10">${month}</h3><div class="flex flex-col gap-3">`;
-                items.forEach(item => html += createHistoryListItem(item));
+                // Pasar el array completo para que createHistoryListItem pueda buscar el anterior
+                items.forEach(item => html += createHistoryListItem(item, fullHistory));
                 html += `</div></div>`;
                 container.innerHTML += html;
             }
         }
 
-        // LISTA DETALLADA (Historial)
-        function createHistoryListItem(item) {
+        function createHistoryListItem(item, allItems) {
             const parts = item.date.split('-');
-            const dateStr = `${parts[2]}/${parts[1]}/${parts[0]}`; 
+            const dateStr = `${parts[2]}/${parts[1]}`; 
+            
+            // Icon color
             const typeColor = item.type === 'Premium' ? 'text-red-500' : 'text-primary';
+            
+            // Lógica Tendencia (Buscar siguiente elemento en el array full, que es el cronológico anterior)
+            const myIndex = allItems.findIndex(i => i.id === item.id);
+            const prevItem = allItems[myIndex + 1]; // +1 porque están ordenados del más nuevo al más viejo
+            
+            let trendIcon = 'trending_flat';
+            let trendColor = 'text-gray-500';
+            
+            if (prevItem && prevItem.kmPerL > 0 && item.kmPerL > 0) {
+                if (item.kmPerL > prevItem.kmPerL + 0.1) { // Margen de 0.1
+                    trendIcon = 'trending_up';
+                    trendColor = 'text-primary';
+                } else if (item.kmPerL < prevItem.kmPerL - 0.1) {
+                    trendIcon = 'trending_down';
+                    trendColor = 'text-orange-400';
+                }
+            } else if (!prevItem) {
+                 // Primer registro histórico
+                 trendIcon = 'fiber_manual_record'; // Punto
+                 trendColor = 'text-gray-600';
+            }
 
             return `
-            <div onclick="openDetailsModal(${item.id})" class="flex items-center gap-4 bg-card-dark p-4 rounded-xl shadow-sm border border-white/5 active:scale-95 transition-transform cursor-pointer">
-                <div class="flex items-center justify-center rounded-xl bg-[#2A3830] shrink-0 size-11 ${typeColor}">
-                    <span class="material-symbols-outlined text-[22px]">local_gas_station</span>
+            <div onclick="openDetailsModal(${item.id})" class="bg-card-dark p-4 rounded-2xl border border-white/5 active:scale-[0.98] transition-transform cursor-pointer shadow-sm">
+                <div class="flex justify-between items-start mb-3">
+                    <div class="flex gap-3">
+                        <div class="flex items-center justify-center rounded-xl bg-[#2A3830] shrink-0 size-11 ${typeColor}">
+                            <span class="material-symbols-outlined text-[22px]">local_gas_station</span>
+                        </div>
+                        <div>
+                            <p class="text-white text-base font-bold truncate w-32">${item.location || 'Gasolinera'}</p>
+                            <p class="text-gray-500 text-xs font-medium">${dateStr}</p>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <p class="text-white text-lg font-bold tracking-tight">$${item.cost}</p>
+                        <p class="text-gray-400 text-xs font-medium">${item.volume} L</p>
+                    </div>
                 </div>
-                <div class="flex flex-col flex-1 min-w-0 gap-1">
-                    <div class="flex justify-between items-baseline">
-                        <p class="text-white text-base font-bold truncate">${item.location || 'Gasolinera'}</p>
-                        <p class="text-white text-base font-bold">$${item.cost}</p>
+                <div class="pt-3 border-t border-white/5 flex justify-between items-center">
+                    <div class="flex items-center gap-1.5">
+                        <span class="material-symbols-outlined text-lg ${trendColor}">${trendIcon}</span>
+                        <span class="text-white font-bold text-sm">${item.kmPerL > 0 ? item.kmPerL.toFixed(1) + ' km/l' : '--'}</span>
                     </div>
-                    <div class="flex justify-between items-center">
-                        <p class="text-gray-400 text-xs font-medium truncate">${dateStr} • ${item.volume}L</p>
-                        <p class="text-gray-500 text-[10px]">$${item.pricePerL.toFixed(2)}/L</p>
-                    </div>
-                     <div class="flex justify-between items-center mt-1">
-                        <span class="text-[10px] text-gray-600 bg-white/5 px-1.5 rounded">${item.odometer} km</span>
-                        <p class="text-primary text-sm font-bold">${item.kmPerL > 0 ? item.kmPerL.toFixed(1) + ' km/l' : '--'}</p>
+                    <div class="flex items-center gap-1 text-gray-500">
+                        <span class="material-symbols-outlined text-sm">attach_money</span>
+                        <span class="text-xs font-medium">$${item.pricePerL.toFixed(2)}/L</span>
                     </div>
                 </div>
             </div>`;
         }
 
-        // --- REPORTES (STATS REDISEÑADAS) ---
+        // --- REPORTES ---
         function renderStats() {
             const historyList = getFullHistoryCalculated().reverse();
             const valid = historyList.filter(h => h.kmPerL > 0);
             
-            // Gráfica
             const ctx = document.getElementById('efficiencyChart').getContext('2d');
             if (efficiencyChartInstance) efficiencyChartInstance.destroy();
             
@@ -678,28 +728,21 @@
                 });
             }
 
-            // Tarjetas de Reporte (Bento Grid)
             if (valid.length === 0) return;
-
-            // Mejor
             const best = valid.reduce((prev, current) => (prev.kmPerL > current.kmPerL) ? prev : current);
             document.getElementById('stats-best').innerText = best.kmPerL.toFixed(1) + ' km/l';
             document.getElementById('stats-best-date').innerText = formatDateShort(best.date);
 
-            // Peor
             const worst = valid.reduce((prev, current) => (prev.kmPerL < current.kmPerL) ? prev : current);
             document.getElementById('stats-worst').innerText = worst.kmPerL.toFixed(1) + ' km/l';
             document.getElementById('stats-worst-date').innerText = formatDateShort(worst.date);
 
-            // Precio Promedio
             const avgPrice = historyList.reduce((acc, curr) => acc + curr.pricePerL, 0) / historyList.length;
             document.getElementById('stats-avg-price').innerText = '$' + avgPrice.toFixed(2);
 
-            // Costo Total
             const totalCost = historyList.reduce((acc, curr) => acc + curr.cost, 0);
             document.getElementById('stats-total-cost').innerText = '$' + totalCost.toLocaleString();
 
-            // Avg Eff (Header Chart)
             const avgEff = valid.reduce((a,b)=>a+b.kmPerL,0) / valid.length;
             document.getElementById('stats-avg-eff').innerHTML = `${avgEff.toFixed(1)} <span class="text-sm font-semibold text-slate-400">km/l</span>`;
         }
