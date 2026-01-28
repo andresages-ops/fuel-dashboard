@@ -20,16 +20,14 @@
                 extend: {
                     colors: {
                         "primary": "#19e65e",
-                        "danger": "#dc2626",
+                        "danger": "#ef4444",
                         "background-light": "#f6f8f6",
                         "background-dark": "#112116",
                         "card-dark": "#1c2a21",
                         "surface-dark": "#1c261f", 
                         "surface-highlight": "#253329",
                     },
-                    fontFamily: {
-                        "display": ["Manrope", "sans-serif"]
-                    },
+                    fontFamily: { "display": ["Manrope", "sans-serif"] },
                     borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "2xl": "1rem", "full": "9999px"},
                 },
             },
@@ -41,17 +39,8 @@
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
         
-        .view-section { 
-            display: none; 
-            min-height: 100vh;
-            width: 100%;
-            padding-bottom: 120px; 
-        }
-        .view-section.active { 
-            display: flex; 
-            flex-direction: column; 
-            animation: fadeIn 0.3s ease-in-out; 
-        }
+        .view-section { display: none; min-height: 100vh; width: 100%; padding-bottom: 120px; }
+        .view-section.active { display: flex; flex-direction: column; animation: fadeIn 0.3s ease-in-out; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         
         .circular-chart { display: block; margin: 0 auto; max-width: 100%; max-height: 200px; } 
@@ -60,9 +49,8 @@
 
         .segmented-control input:checked + label { color: #000; font-weight: 700; }
         #type-regular:checked + label { background-color: #19e65e; }
-        #type-premium:checked + label { background-color: #dc2626; color: #fff; }
+        #type-premium:checked + label { background-color: #ef4444; color: #fff; }
         
-        /* Estilo personalizado para el Select */
         .custom-select {
             appearance: none;
             background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%239ca3af' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
@@ -71,18 +59,27 @@
             background-size: 1.5em 1.5em;
             padding-right: 2.5rem;
         }
+
+        /* Toast Animation */
+        #toast-notification { transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.3s ease; }
+        .toast-hidden { transform: translate(-50%, -150%) !important; opacity: 0; pointer-events: none; }
+        .toast-visible { transform: translate(-50%, 20px) !important; opacity: 1; }
     </style>
 </head>
 
 <body class="bg-background-light dark:bg-background-dark font-display text-slate-900 dark:text-white transition-colors duration-200 min-h-screen relative">
 
+    <div id="toast-notification" class="fixed top-0 left-1/2 z-[100] toast-hidden flex items-center gap-3 bg-[#253329] border border-primary/30 px-5 py-3 rounded-full shadow-2xl shadow-black/50 backdrop-blur-md">
+        <span id="toast-icon" class="material-symbols-outlined text-primary">check_circle</span>
+        <p id="toast-message" class="text-sm font-bold text-white">Operación Exitosa</p>
+    </div>
+
     <div id="view-dashboard" class="view-section active">
         <header class="sticky top-0 z-30 flex items-center justify-between px-4 py-4 bg-background-dark/95 backdrop-blur-md border-b border-white/5">
             <div class="flex items-center gap-2">
                 <h1 class="text-base font-bold tracking-tight">Fuel Dashboard</h1>
-                <span class="text-[9px] font-bold bg-primary/20 text-primary px-1.5 py-0.5 rounded border border-primary/20">v1.5</span>
+                <span class="text-[9px] font-bold bg-primary/20 text-primary px-1.5 py-0.5 rounded border border-primary/20">v1.6</span>
             </div>
-            
             <div class="relative">
                 <select id="dash-filter-select" onchange="setFilter('dashboard', this.value)" class="custom-select bg-surface-dark text-white text-xs font-bold py-2 pl-4 pr-8 rounded-full border border-white/10 focus:ring-0 focus:border-primary outline-none">
                     <option value="1M" selected>Este Mes</option>
@@ -108,8 +105,8 @@
                 </div>
                 <div class="text-center">
                     <h2 class="text-sm font-semibold text-gray-400 uppercase tracking-wide">Eficiencia Promedio</h2>
-                    <p id="maintenance-alert" class="text-[10px] text-orange-400 font-medium mt-1 hidden bg-orange-900/30 px-2 py-0.5 rounded-full">
-                        ⚠️ Mantenimiento
+                    <p id="maintenance-alert" class="text-[10px] text-orange-400 font-medium mt-1 hidden bg-orange-900/30 px-3 py-1 rounded-full border border-orange-900">
+                        ⚠️ Mantenimiento Requerido
                     </p>
                 </div>
             </section>
@@ -150,13 +147,6 @@
                 </div>
             </section>
         </main>
-        
-        <div class="fixed bottom-24 right-5 z-40">
-            <button onclick="openAddModal()" class="flex items-center gap-2 bg-primary hover:bg-primary/90 text-black font-bold py-3 px-5 rounded-full shadow-lg shadow-primary/30 transform transition hover:scale-105 active:scale-95">
-                <span class="material-symbols-outlined text-[22px]">add</span>
-                <span class="text-sm">Cargar</span>
-            </button>
-        </div>
     </div>
 
     <div id="view-history" class="view-section">
@@ -222,7 +212,6 @@
                     <div>
                         <p class="text-slate-400 text-[10px] font-bold uppercase tracking-wider">Mejor</p>
                         <h2 id="stats-best" class="text-white text-xl font-bold mt-0.5">--</h2>
-                        <p id="stats-best-date" class="text-slate-500 text-[10px] mt-0.5">--</p>
                     </div>
                 </div>
                 <div class="flex flex-col gap-2 rounded-2xl bg-card-dark p-4 border border-white/5">
@@ -232,7 +221,6 @@
                     <div>
                         <p class="text-slate-400 text-[10px] font-bold uppercase tracking-wider">Peor</p>
                         <h2 id="stats-worst" class="text-white text-xl font-bold mt-0.5">--</h2>
-                        <p id="stats-worst-date" class="text-slate-500 text-[10px] mt-0.5">--</p>
                     </div>
                 </div>
                 <div class="flex flex-col gap-2 rounded-2xl bg-card-dark p-4 border border-white/5">
@@ -242,7 +230,6 @@
                     <div>
                         <p class="text-slate-400 text-[10px] font-bold uppercase tracking-wider">Precio Prom.</p>
                         <h2 id="stats-avg-price" class="text-white text-xl font-bold mt-0.5">--</h2>
-                        <p class="text-slate-500 text-[10px] mt-0.5">Por litro</p>
                     </div>
                 </div>
                 <div class="flex flex-col gap-2 rounded-2xl bg-card-dark p-4 border border-white/5">
@@ -252,7 +239,6 @@
                     <div>
                         <p class="text-slate-400 text-[10px] font-bold uppercase tracking-wider">Gasto Total</p>
                         <h2 id="stats-total-cost" class="text-white text-xl font-bold mt-0.5">--</h2>
-                        <p class="text-slate-500 text-[10px] mt-0.5">Histórico</p>
                     </div>
                 </div>
             </div>
@@ -267,13 +253,25 @@
             <section class="flex flex-col gap-2">
                 <label class="text-xs font-bold text-gray-400 uppercase tracking-wider ml-1">Odómetro Inicial (km)</label>
                 <input id="setting-initial-odo" type="number" class="w-full bg-surface-dark border-2 border-transparent focus:border-primary rounded-xl px-4 py-3 text-white outline-none" placeholder="0">
+                <p class="text-[10px] text-gray-500 px-1">Lectura del auto cuando comenzaste a usar la app.</p>
+            </section>
+            
+            <hr class="border-gray-800">
+
+            <h3 class="text-sm font-bold text-primary">Configuración Mantenimiento</h3>
+            <section class="flex flex-col gap-2">
+                <label class="text-xs font-bold text-gray-400 uppercase tracking-wider ml-1">Último Servicio Realizado (km)</label>
+                <input id="setting-last-service" type="number" class="w-full bg-surface-dark border-2 border-transparent focus:border-primary rounded-xl px-4 py-3 text-white outline-none" placeholder="Ej. 120000">
             </section>
             <section class="flex flex-col gap-2">
-                <label class="text-xs font-bold text-gray-400 uppercase tracking-wider ml-1">Próximo Servicio (km)</label>
-                <input id="setting-service-odo" type="number" class="w-full bg-surface-dark border-2 border-transparent focus:border-primary rounded-xl px-4 py-3 text-white outline-none" placeholder="Ej. 130000">
+                <label class="text-xs font-bold text-gray-400 uppercase tracking-wider ml-1">Intervalo de Servicio (km)</label>
+                <input id="setting-interval" type="number" class="w-full bg-surface-dark border-2 border-transparent focus:border-primary rounded-xl px-4 py-3 text-white outline-none" placeholder="Ej. 10000">
             </section>
-            <button onclick="saveSettings()" class="bg-primary text-black font-bold py-3 rounded-xl">Guardar Cambios</button>
+
+            <button onclick="saveSettings()" class="bg-primary hover:bg-green-400 text-black font-bold py-3 rounded-xl transition-colors">Guardar Cambios</button>
+            
             <hr class="border-gray-800 my-2">
+            
             <button onclick="exportData()" class="flex items-center justify-center gap-2 bg-gray-700 text-white font-bold py-3 rounded-xl text-sm">
                 <span class="material-symbols-outlined">download</span> Exportar Respaldo
             </button>
@@ -292,7 +290,7 @@
     <div id="modal-add" class="fixed inset-0 z-[60] bg-background-dark transform translate-y-full transition-transform duration-300 flex flex-col">
         <header class="flex items-center justify-between px-4 py-3 bg-background-dark border-b border-gray-800">
             <button onclick="goBack()" class="text-primary text-sm font-medium">Cancelar</button>
-            <h1 class="text-base font-bold tracking-tight">Agregar Carga</h1>
+            <h1 id="modal-title" class="text-base font-bold tracking-tight">Agregar Carga</h1>
             <div class="w-10"></div>
         </header>
 
@@ -306,6 +304,7 @@
                     <input id="input-date" type="date" class="bg-transparent text-white text-sm font-semibold border-none p-0 focus:ring-0 w-full">
                 </div>
             </div>
+            
             <section class="flex flex-col gap-1">
                 <div class="segmented-control flex p-1 bg-surface-dark rounded-xl border border-gray-800">
                     <div class="flex-1">
@@ -318,13 +317,23 @@
                     </div>
                 </div>
             </section>
-            <section class="flex flex-col gap-1">
-                <label class="text-[10px] font-bold text-gray-400 uppercase tracking-wider ml-1">Odómetro Actual</label>
-                <div class="relative group">
-                    <input id="input-odo" class="w-full bg-surface-dark border-2 border-transparent focus:border-primary rounded-xl px-4 py-3 text-2xl font-bold outline-none text-white transition-all shadow-sm ring-0 focus:ring-0 placeholder-gray-600" placeholder="0" type="number"/>
-                    <span class="absolute right-4 top-1/2 -translate-y-1/2 text-sm font-bold text-gray-500 pointer-events-none">km</span>
-                </div>
-            </section>
+
+            <div class="grid grid-cols-2 gap-3 items-end">
+                <section class="flex flex-col gap-1">
+                    <label class="text-[10px] font-bold text-primary uppercase tracking-wider ml-1">Distancia Viaje (Trip)</label>
+                    <div class="relative group">
+                        <input id="input-trip" oninput="calculateOdoFromTrip(this.value)" class="w-full bg-surface-highlight border-2 border-primary/30 focus:border-primary rounded-xl px-3 py-3 text-lg font-bold outline-none text-white transition-all shadow-sm ring-0 focus:ring-0 placeholder-gray-500" placeholder="+ km" type="number"/>
+                    </div>
+                </section>
+                <section class="flex flex-col gap-1">
+                    <label class="text-[10px] font-bold text-gray-400 uppercase tracking-wider ml-1">Odómetro Resultante</label>
+                    <div class="relative group">
+                        <input id="input-odo" class="w-full bg-surface-dark border-2 border-transparent focus:border-primary rounded-xl px-4 py-3 text-xl font-bold outline-none text-white transition-all shadow-sm ring-0 focus:ring-0 placeholder-gray-600" placeholder="0" type="number"/>
+                        <span class="absolute right-4 top-1/2 -translate-y-1/2 text-xs font-bold text-gray-500 pointer-events-none">km</span>
+                    </div>
+                </section>
+            </div>
+
              <section class="flex flex-col gap-1">
                 <label class="text-[10px] font-bold text-gray-400 uppercase tracking-wider ml-1">Km Restantes (Autonomía)</label>
                 <div class="relative group">
@@ -332,6 +341,7 @@
                     <span class="absolute right-4 top-1/2 -translate-y-1/2 text-sm font-bold text-gray-500 pointer-events-none">km</span>
                 </div>
             </section>
+
             <div class="grid grid-cols-2 gap-3">
                 <section class="flex flex-col gap-1">
                     <label class="text-[10px] font-bold text-gray-400 uppercase tracking-wider ml-1">Litros</label>
@@ -348,6 +358,7 @@
                     </div>
                 </section>
             </div>
+
             <section class="flex flex-col gap-1">
                 <label class="text-[10px] font-bold text-gray-400 uppercase tracking-wider ml-1">Gasolinera</label>
                 <div class="relative flex items-center w-full bg-surface-dark rounded-xl shadow-sm border-2 border-transparent focus-within:border-primary transition-all">
@@ -376,8 +387,10 @@
                     <h3 id="detail-location" class="text-xl font-bold text-white leading-tight">--</h3>
                     <p id="detail-date" class="text-gray-400 text-xs font-semibold mt-1">--</p>
                 </div>
-                <div class="text-right">
-                    <button onclick="closeDetailsModal()" class="text-gray-400 hover:text-white bg-white/5 p-1 rounded-full"><span class="material-symbols-outlined">close</span></button>
+                <div class="flex items-center gap-2">
+                    <button onclick="editRefill()" class="text-gray-400 hover:text-white bg-white/5 p-2 rounded-full transition-colors"><span class="material-symbols-outlined text-sm">edit</span></button>
+                    <button onclick="deleteRefill()" class="text-red-400 hover:text-red-300 bg-red-900/20 p-2 rounded-full transition-colors"><span class="material-symbols-outlined text-sm">delete</span></button>
+                    <button onclick="closeDetailsModal()" class="text-gray-400 hover:text-white ml-2"><span class="material-symbols-outlined">close</span></button>
                 </div>
             </div>
 
@@ -430,53 +443,85 @@
                     <p id="detail-notes" class="text-xs text-gray-300 italic">--</p>
                 </div>
             </div>
-            
-            <div class="p-4 pt-0">
-                <button onclick="closeDetailsModal()" class="w-full py-3 bg-white/10 hover:bg-white/20 rounded-xl font-bold text-white text-sm">Cerrar</button>
-            </div>
         </div>
     </div>
 
     <nav class="fixed bottom-0 w-full z-30 bg-[#151f19] border-t border-white/5 pb-safe">
-        <div class="flex items-center justify-around h-16 max-w-md mx-auto px-1">
-            <button onclick="switchView('dashboard')" class="nav-btn flex flex-col items-center justify-center w-full h-full gap-1 text-primary active">
+        <div class="flex items-center justify-between h-16 max-w-md mx-auto px-4 relative">
+            <button onclick="switchView('dashboard')" class="nav-btn flex flex-col items-center justify-center w-12 gap-1 text-primary active">
                 <span class="material-symbols-outlined text-[24px]">dashboard</span>
-                <span class="text-[10px] font-bold">Inicio</span>
+                <span class="text-[9px] font-bold">Inicio</span>
             </button>
-            <button onclick="switchView('history')" class="nav-btn flex flex-col items-center justify-center w-full h-full gap-1 text-gray-500 hover:text-white transition-colors">
+            <button onclick="switchView('history')" class="nav-btn flex flex-col items-center justify-center w-12 gap-1 text-gray-500 hover:text-white transition-colors">
                 <span class="material-symbols-outlined text-[24px]">history</span>
-                <span class="text-[10px] font-medium">Historial</span>
+                <span class="text-[9px] font-medium">Historial</span>
             </button>
-            <button onclick="switchView('stats')" class="nav-btn flex flex-col items-center justify-center w-full h-full gap-1 text-gray-500 hover:text-white transition-colors">
+
+            <button onclick="openAddModal()" class="absolute left-1/2 -translate-x-1/2 -top-6 bg-primary hover:bg-green-400 text-black rounded-full size-14 flex items-center justify-center shadow-lg shadow-primary/30 active:scale-95 transition-all z-50 border-4 border-[#151f19]">
+                <span class="material-symbols-outlined text-3xl font-bold">add</span>
+            </button>
+
+            <button onclick="switchView('stats')" class="nav-btn flex flex-col items-center justify-center w-12 gap-1 text-gray-500 hover:text-white transition-colors">
                 <span class="material-symbols-outlined text-[24px]">insights</span>
-                <span class="text-[10px] font-medium">Reportes</span>
+                <span class="text-[9px] font-medium">Reportes</span>
             </button>
-            <button onclick="switchView('settings')" class="nav-btn flex flex-col items-center justify-center w-full h-full gap-1 text-gray-500 hover:text-white transition-colors">
+            <button onclick="switchView('settings')" class="nav-btn flex flex-col items-center justify-center w-12 gap-1 text-gray-500 hover:text-white transition-colors">
                 <span class="material-symbols-outlined text-[24px]">settings</span>
-                <span class="text-[10px] font-medium">Ajustes</span>
+                <span class="text-[9px] font-medium">Ajustes</span>
             </button>
         </div>
     </nav>
 
     <script>
         let appData = {
-            settings: { initialOdometer: 0, nextServiceKm: 0 },
+            settings: { 
+                initialOdometer: 0, 
+                lastServiceKm: 0, 
+                serviceInterval: 10000 
+            },
             refills: []
         };
         let dashboardFilter = '1M';
         let historyFilter = 'ALL';
+        let editingId = null; // ID del registro que se está editando
+        let viewingId = null; // ID del registro que se está viendo en detalles
 
         const STORAGE_KEY = 'fuel_app_db_v1';
         let efficiencyChartInstance = null;
 
+        // --- INICIALIZACIÓN ---
         window.addEventListener('DOMContentLoaded', () => {
             loadData();
             history.replaceState({view: 'dashboard'}, 'Dashboard', '');
             setFilter('dashboard', '1M'); 
             setFilter('history', 'ALL');
-            document.getElementById('input-date').value = new Date().toISOString().split('T')[0];
         });
 
+        // --- TOAST NOTIFICATIONS ---
+        function showToast(message, type = 'success') {
+            const toast = document.getElementById('toast-notification');
+            const msgEl = document.getElementById('toast-message');
+            const iconEl = document.getElementById('toast-icon');
+
+            msgEl.innerText = message;
+            if (type === 'error') {
+                iconEl.innerText = 'error';
+                iconEl.classList.replace('text-primary', 'text-red-500');
+            } else {
+                iconEl.innerText = 'check_circle';
+                iconEl.classList.replace('text-red-500', 'text-primary');
+            }
+
+            toast.classList.remove('toast-hidden');
+            toast.classList.add('toast-visible');
+
+            setTimeout(() => {
+                toast.classList.remove('toast-visible');
+                toast.classList.add('toast-hidden');
+            }, 3000);
+        }
+
+        // --- NAVEGACIÓN ---
         window.addEventListener('popstate', (event) => {
             const state = event.state;
             const addModal = document.getElementById('modal-add');
@@ -487,9 +532,47 @@
         });
 
         function goBack() { window.history.back(); }
+
+        // --- DATOS ---
         function loadData() { const saved = localStorage.getItem(STORAGE_KEY); if (saved) appData = JSON.parse(saved); }
         function saveData() { localStorage.setItem(STORAGE_KEY, JSON.stringify(appData)); renderDashboard(); }
-        
+
+        // --- LÓGICA DE NEGOCIO ---
+        function calculateOdoFromTrip(tripValue) {
+            const trip = parseFloat(tripValue);
+            if (isNaN(trip)) return;
+
+            // Encontrar el último odómetro (o inicial)
+            // Si estamos editando, no deberíamos tomar el "último" absoluto, sino el anterior a este.
+            // Para simplificar V1, tomamos el más alto registrado que no sea el actual si estamos editando.
+            
+            let baseOdo = appData.settings.initialOdometer;
+            
+            // Ordenamos para encontrar el último real
+            if (appData.refills.length > 0) {
+                 const max = Math.max(...appData.refills.map(r => r.odometer));
+                 if (max > baseOdo) baseOdo = max;
+            }
+            
+            // Si estamos editando, esto es un poco complejo, así que usaremos el "Last Odo" simple para cargas nuevas.
+            document.getElementById('input-odo').value = baseOdo + trip;
+        }
+
+        function getMaintenanceStatus() {
+            const lastService = appData.settings.lastServiceKm || 0;
+            const interval = appData.settings.serviceInterval || 10000;
+            const currentOdo = appData.refills.length > 0 
+                ? Math.max(...appData.refills.map(r => r.odometer)) 
+                : appData.settings.initialOdometer;
+            
+            const nextService = lastService + interval;
+            return {
+                due: currentOdo >= nextService,
+                kmRemaining: nextService - currentOdo,
+                nextServiceKm: nextService
+            };
+        }
+
         function setFilter(context, period) {
             if (context === 'dashboard') {
                 dashboardFilter = period;
@@ -530,7 +613,7 @@
                 const stats = calculateStats(r, prevOdo);
                 prevOdo = r.odometer; 
                 return { ...r, ...stats };
-            }).reverse(); // Más reciente primero
+            }).reverse(); 
         }
 
         // --- DASHBOARD ---
@@ -552,11 +635,12 @@
                 document.getElementById('dash-last-price').innerText = fullHistory[0].pricePerL.toFixed(2);
             }
 
-            const currentOdo = fullHistory.length > 0 ? fullHistory[0].odometer : appData.settings.initialOdometer;
+            // Mantenimiento (Lógica Nueva)
+            const maint = getMaintenanceStatus();
             const alertEl = document.getElementById('maintenance-alert');
-            if (appData.settings.nextServiceKm > 0 && currentOdo >= appData.settings.nextServiceKm) {
+            if (maint.due) {
                 alertEl.classList.remove('hidden');
-                alertEl.innerText = `⚠️ Mantenimiento: ${appData.settings.nextServiceKm}km`;
+                alertEl.innerText = `⚠️ Mantenimiento: ${maint.nextServiceKm}km`;
             } else {
                 alertEl.classList.add('hidden');
             }
@@ -598,7 +682,6 @@
             const fullHistory = getFullHistoryCalculated();
             const filtered = filterDataByPeriod(fullHistory, historyFilter);
             
-            // Actualizar Resumen Historial
             const totalSpent = filtered.reduce((acc, curr) => acc + curr.cost, 0);
             const valid = filtered.filter(h => h.kmPerL > 0);
             const avgEff = valid.length ? (valid.reduce((acc, curr) => acc + curr.kmPerL, 0) / valid.length) : 0;
@@ -606,11 +689,9 @@
             document.getElementById('hist-summary-spent').innerText = `$${totalSpent.toLocaleString()}`;
             document.getElementById('hist-summary-eff').innerHTML = `${avgEff.toFixed(1)} <span class="text-xs text-gray-500 font-normal">km/l</span>`;
 
-            // Lista
             const container = document.getElementById('history-container');
             container.innerHTML = '';
             
-            // Agrupar (mismo metodo anterior pero con nueva tarjeta)
             const groups = {};
             filtered.forEach(item => {
                 const parts = item.date.split('-');
@@ -622,7 +703,6 @@
 
             for (const [month, items] of Object.entries(groups)) {
                 let html = `<div class="mb-2"><h3 class="text-gray-500 text-[10px] font-bold uppercase tracking-wider mb-2 sticky top-0 bg-background-dark py-2 z-10">${month}</h3><div class="flex flex-col gap-3">`;
-                // Pasar el array completo para que createHistoryListItem pueda buscar el anterior
                 items.forEach(item => html += createHistoryListItem(item, fullHistory));
                 html += `</div></div>`;
                 container.innerHTML += html;
@@ -632,29 +712,22 @@
         function createHistoryListItem(item, allItems) {
             const parts = item.date.split('-');
             const dateStr = `${parts[2]}/${parts[1]}`; 
-            
-            // Icon color
             const typeColor = item.type === 'Premium' ? 'text-red-500' : 'text-primary';
             
-            // Lógica Tendencia (Buscar siguiente elemento en el array full, que es el cronológico anterior)
             const myIndex = allItems.findIndex(i => i.id === item.id);
-            const prevItem = allItems[myIndex + 1]; // +1 porque están ordenados del más nuevo al más viejo
+            const prevItem = allItems[myIndex + 1]; 
             
             let trendIcon = 'trending_flat';
             let trendColor = 'text-gray-500';
             
             if (prevItem && prevItem.kmPerL > 0 && item.kmPerL > 0) {
-                if (item.kmPerL > prevItem.kmPerL + 0.1) { // Margen de 0.1
-                    trendIcon = 'trending_up';
-                    trendColor = 'text-primary';
+                if (item.kmPerL > prevItem.kmPerL + 0.1) { 
+                    trendIcon = 'trending_up'; trendColor = 'text-primary';
                 } else if (item.kmPerL < prevItem.kmPerL - 0.1) {
-                    trendIcon = 'trending_down';
-                    trendColor = 'text-orange-400';
+                    trendIcon = 'trending_down'; trendColor = 'text-orange-400';
                 }
             } else if (!prevItem) {
-                 // Primer registro histórico
-                 trendIcon = 'fiber_manual_record'; // Punto
-                 trendColor = 'text-gray-600';
+                 trendIcon = 'fiber_manual_record'; trendColor = 'text-gray-600';
             }
 
             return `
@@ -705,20 +778,14 @@
                     data: {
                         labels: valid.map(h => { const p = h.date.split('-'); return `${p[2]}/${p[1]}`; }),
                         datasets: [{
-                            label: 'Eficiencia',
-                            data: valid.map(h => h.kmPerL),
-                            borderColor: '#19e65e',
-                            backgroundColor: gradient,
-                            borderWidth: 2,
-                            pointBackgroundColor: '#112116',
-                            pointBorderColor: '#19e65e',
-                            tension: 0.4,
-                            fill: true
+                            label: 'Eficiencia', data: valid.map(h => h.kmPerL),
+                            borderColor: '#19e65e', backgroundColor: gradient,
+                            borderWidth: 2, pointBackgroundColor: '#112116',
+                            pointBorderColor: '#19e65e', tension: 0.4, fill: true
                         }]
                     },
                     options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
+                        responsive: true, maintainAspectRatio: false,
                         plugins: { legend: { display: false } },
                         scales: {
                             x: { grid: { display: false }, ticks: { color: '#666', font: {size: 10} } },
@@ -731,27 +798,17 @@
             if (valid.length === 0) return;
             const best = valid.reduce((prev, current) => (prev.kmPerL > current.kmPerL) ? prev : current);
             document.getElementById('stats-best').innerText = best.kmPerL.toFixed(1) + ' km/l';
-            document.getElementById('stats-best-date').innerText = formatDateShort(best.date);
-
             const worst = valid.reduce((prev, current) => (prev.kmPerL < current.kmPerL) ? prev : current);
             document.getElementById('stats-worst').innerText = worst.kmPerL.toFixed(1) + ' km/l';
-            document.getElementById('stats-worst-date').innerText = formatDateShort(worst.date);
-
             const avgPrice = historyList.reduce((acc, curr) => acc + curr.pricePerL, 0) / historyList.length;
             document.getElementById('stats-avg-price').innerText = '$' + avgPrice.toFixed(2);
-
             const totalCost = historyList.reduce((acc, curr) => acc + curr.cost, 0);
             document.getElementById('stats-total-cost').innerText = '$' + totalCost.toLocaleString();
-
             const avgEff = valid.reduce((a,b)=>a+b.kmPerL,0) / valid.length;
             document.getElementById('stats-avg-eff').innerHTML = `${avgEff.toFixed(1)} <span class="text-sm font-semibold text-slate-400">km/l</span>`;
         }
 
-        function formatDateShort(dateString) {
-            const parts = dateString.split('-');
-            return `${parts[2]}/${parts[1]}/${parts[0]}`;
-        }
-
+        // --- MANEJO DE VISTAS ---
         function switchView(viewName) {
             history.pushState({view: viewName}, viewName, '');
             showViewUI(viewName);
@@ -767,7 +824,8 @@
             if (viewName === 'stats') renderStats();
             if (viewName === 'settings') {
                 document.getElementById('setting-initial-odo').value = appData.settings.initialOdometer;
-                document.getElementById('setting-service-odo').value = appData.settings.nextServiceKm;
+                document.getElementById('setting-last-service').value = appData.settings.lastServiceKm || '';
+                document.getElementById('setting-interval').value = appData.settings.serviceInterval || 10000;
             }
 
             const navIndex = viewName === 'dashboard' ? 0 : viewName === 'history' ? 1 : viewName === 'stats' ? 2 : viewName === 'settings' ? 3 : -1;
@@ -775,17 +833,62 @@
             window.scrollTo(0,0);
         }
 
-        function openAddModal() {
-            history.pushState({modal: 'add'}, 'Add Refill', '');
+        // --- GESTIÓN DE MODALES Y EDICIÓN ---
+        function openAddModal(isEdit = false) {
+            history.pushState({modal: 'add'}, isEdit ? 'Edit Refill' : 'Add Refill', '');
             document.getElementById('modal-add').classList.remove('translate-y-full');
-            document.getElementById('input-odo').value = ''; 
-            const lastOdo = appData.refills.length > 0 
-                ? Math.max(...appData.refills.map(r => r.odometer)) 
-                : appData.settings.initialOdometer;
-            document.getElementById('input-odo').placeholder = lastOdo > 0 ? lastOdo.toString() : "0";
+            document.getElementById('modal-title').innerText = isEdit ? 'Editar Carga' : 'Agregar Carga';
+
+            if (!isEdit) {
+                editingId = null;
+                document.getElementById('input-date').value = new Date().toISOString().split('T')[0];
+                document.getElementById('input-odo').value = ''; 
+                document.getElementById('input-trip').value = '';
+                document.getElementById('input-vol').value = '';
+                document.getElementById('input-cost').value = '';
+                document.getElementById('input-range').value = '';
+                document.getElementById('input-loc').value = '';
+                document.getElementById('input-notes').value = '';
+                // Hint de Odómetro
+                const lastOdo = appData.refills.length > 0 ? Math.max(...appData.refills.map(r => r.odometer)) : appData.settings.initialOdometer;
+                document.getElementById('input-odo').placeholder = lastOdo > 0 ? lastOdo.toString() : "0";
+            }
+        }
+
+        function editRefill() {
+            if (!viewingId) return;
+            const item = appData.refills.find(r => r.id === viewingId);
+            if (!item) return;
+
+            editingId = viewingId;
+            closeDetailsModal(); // Cerramos detalles
+            openAddModal(true); // Abrimos editor
+
+            // Llenar datos
+            document.getElementById('input-date').value = item.date;
+            document.getElementById('input-odo').value = item.odometer;
+            document.getElementById('input-vol').value = item.volume;
+            document.getElementById('input-cost').value = item.cost;
+            document.getElementById('input-loc').value = item.location;
+            document.getElementById('input-notes').value = item.notes;
+            if(item.range) document.getElementById('input-range').value = item.range;
+            
+            const radio = document.querySelector(`input[name="fuelType"][value="${item.type}"]`);
+            if(radio) radio.checked = true;
+        }
+
+        function deleteRefill() {
+            if (!viewingId) return;
+            if(confirm("¿Eliminar este registro permanentemente?")) {
+                appData.refills = appData.refills.filter(r => r.id !== viewingId);
+                saveData();
+                closeDetailsModal();
+                showToast("Registro eliminado", "error");
+            }
         }
 
         function openDetailsModal(id) {
+            viewingId = id;
             const historyList = getFullHistoryCalculated();
             const item = historyList.find(r => r.id === id);
             if(!item) return;
@@ -830,26 +933,27 @@
             const notes = document.getElementById('input-notes').value;
             const range = document.getElementById('input-range').value;
 
-            if (!date || isNaN(odo) || isNaN(vol) || isNaN(cost)) { alert("Completa los datos numéricos"); return; }
+            if (!date || isNaN(odo) || isNaN(vol) || isNaN(cost)) { showToast("Completa los datos numéricos", "error"); return; }
 
-            const newRefill = {
-                id: Date.now(),
+            const refillData = {
+                id: editingId ? editingId : Date.now(), // Usar ID existente si editamos
                 date: date, odometer: odo, volume: vol, cost: cost,
                 location: loc, type: type, notes: notes, range: range ? parseFloat(range) : null
             };
 
-            appData.refills.push(newRefill);
+            if (editingId) {
+                // Actualizar existente
+                const index = appData.refills.findIndex(r => r.id === editingId);
+                if (index !== -1) appData.refills[index] = refillData;
+            } else {
+                // Nuevo
+                appData.refills.push(refillData);
+            }
+
             saveData();
-            
-            document.getElementById('input-odo').value = '';
-            document.getElementById('input-vol').value = '';
-            document.getElementById('input-cost').value = '';
-            document.getElementById('input-range').value = '';
-            document.getElementById('input-loc').value = '';
-            document.getElementById('input-notes').value = '';
-            
-            window.history.back();
-            setTimeout(() => alert("Guardado"), 100);
+            window.history.back(); // Cerrar modal
+            setTimeout(() => showToast(editingId ? "Carga actualizada" : "Carga guardada"), 200);
+            editingId = null;
         }
 
         function deleteAllData() {
@@ -860,10 +964,15 @@
         }
         function saveSettings() {
             const initOdo = parseFloat(document.getElementById('setting-initial-odo').value);
-            const servOdo = parseFloat(document.getElementById('setting-service-odo').value);
+            const lastServ = parseFloat(document.getElementById('setting-last-service').value);
+            const interval = parseFloat(document.getElementById('setting-interval').value);
+
             if (!isNaN(initOdo)) appData.settings.initialOdometer = initOdo;
-            if (!isNaN(servOdo)) appData.settings.nextServiceKm = servOdo;
-            saveData(); alert("Guardado");
+            if (!isNaN(lastServ)) appData.settings.lastServiceKm = lastServ;
+            if (!isNaN(interval)) appData.settings.serviceInterval = interval;
+            
+            saveData(); 
+            showToast("Ajustes guardados");
         }
         function exportData() {
             const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(appData));
@@ -877,8 +986,8 @@
             reader.onload = function(e) {
                 try {
                     const json = JSON.parse(e.target.result);
-                    if (json.refills) { appData = json; saveData(); alert("Restaurado"); location.reload(); }
-                } catch (err) { alert("Error"); }
+                    if (json.refills) { appData = json; saveData(); showToast("Datos restaurados"); setTimeout(()=>location.reload(), 1000); }
+                } catch (err) { showToast("Error de archivo", "error"); }
             }; reader.readAsText(file);
         }
     </script>
