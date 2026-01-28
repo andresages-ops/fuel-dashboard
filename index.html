@@ -9,6 +9,7 @@
     <title>Fuel Dashboard</title>
     
     <link rel="manifest" href="data:application/manifest+json;base64,ewogICJuYW1lIjogIkZ1ZWwgRGFzaGJvYXJkIiwKICAic2hvcnRfbmFtZSI6ICJGdWVsIiwKICAic3RhcnRfdXJsIjogIi4iLAogICJkaXNwbGF5IjogInN0YW5kYWxvbmUiLAogICJiYWNrZ3JvdW5kX2NvbG9yIjogIiMxMTIxMTYiLAogICJ0aGVtZV9jb2xvciI6ICIjMTEyMTE2IiwKICAiaWNvbnMiOiBbCiAgICB7CiAgICAgICJzcmMiOiAiaHR0cHM6Ly9jZG4taWNvbnMtcG5nLmZsYXRpY29uLmNvbS81MTIvMTU5OC8xNTk4MTk2LnBuZyIsCiAgICAgICJzaXplcyI6ICI1MTJ4NTEyIiwKICAgICAgInR5cGUiOiAiaW1hZ2UvcG5nIgogICAgfQogIF0KfQ==" />
+    <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/1598/1598196.png">
     
     <link href="https://fonts.googleapis.com" rel="preconnect"/>
     <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
@@ -41,9 +42,8 @@
     </script>
 
     <style>
-        /* Deshabilitar refresh nativo para usar el nuestro custom si se desea, o permitirlo */
         body { 
-            overscroll-behavior-y: contain; /* Permite pull-to-refresh en Chrome Android, previene rebote excesivo */
+            overscroll-behavior-y: contain; 
             -webkit-tap-highlight-color: transparent;
             user-select: none;
         }
@@ -84,21 +84,23 @@
         /* Pull to Refresh Indicator */
         #ptr-spinner {
             position: fixed;
-            top: 10px;
+            top: 15px;
             left: 50%;
             transform: translateX(-50%) scale(0);
             z-index: 200;
             background: #253329;
+            border: 1px solid #19e65e;
             border-radius: 50%;
             padding: 8px;
             box-shadow: 0 4px 12px rgba(0,0,0,0.5);
-            transition: transform 0.2s;
+            transition: transform 0.1s linear; /* Más rápido para seguimiento */
             display: flex;
             align-items: center;
             justify-content: center;
+            pointer-events: none;
         }
         .ptr-loading { animation: spin 1s linear infinite; }
-        @keyframes spin { 100% { transform: rotate(360deg); } }
+        @keyframes spin { 100% { transform: translateX(-50%) rotate(360deg); } }
     </style>
 </head>
 
@@ -131,7 +133,7 @@
         <header class="sticky top-0 z-30 flex items-center justify-between px-4 py-4 bg-background-dark/95 backdrop-blur-md border-b border-white/5 pt-safe">
             <div class="flex items-center gap-2">
                 <h1 class="text-base font-bold tracking-tight">Fuel Dashboard</h1>
-                <span class="text-[9px] font-bold bg-primary/20 text-primary px-1.5 py-0.5 rounded border border-primary/20">v2.1</span>
+                <span class="text-[9px] font-bold bg-primary/20 text-primary px-1.5 py-0.5 rounded border border-primary/20">v2.2</span>
             </div>
             
             <div class="relative z-50">
@@ -335,17 +337,20 @@
             <hr class="border-gray-800 my-2">
             
             <div class="bg-surface-dark p-4 rounded-xl border border-white/5">
-                <h4 class="text-sm font-bold text-white mb-2">Instalar App</h4>
-                <p class="text-[10px] text-gray-400 mb-2">Para una mejor experiencia, añade esta página a tu pantalla de inicio.</p>
-                <p class="text-[10px] text-primary">iOS: Compartir -> Agregar al Inicio<br>Android: Menú -> Instalar App</p>
+                <h4 class="text-sm font-bold text-white mb-2">Respaldo de Datos</h4>
+                <div class="grid grid-cols-2 gap-3">
+                    <button onclick="exportData()" class="flex items-center justify-center gap-2 bg-gray-700 hover:bg-gray-600 text-white font-bold py-3 rounded-xl text-xs">
+                        <span class="material-symbols-outlined text-sm">download</span> JSON
+                    </button>
+                    <button onclick="exportCSV()" class="flex items-center justify-center gap-2 bg-green-900 hover:bg-green-800 text-green-200 font-bold py-3 rounded-xl text-xs border border-green-700">
+                        <span class="material-symbols-outlined text-sm">table_view</span> Excel
+                    </button>
+                </div>
             </div>
 
-            <button onclick="exportData()" class="flex items-center justify-center gap-2 bg-gray-700 text-white font-bold py-3 rounded-xl text-sm">
-                <span class="material-symbols-outlined">download</span> Exportar Respaldo
-            </button>
             <div class="relative">
                 <button class="flex w-full items-center justify-center gap-2 bg-gray-800 text-white font-bold py-3 rounded-xl border border-gray-700 text-sm">
-                    <span class="material-symbols-outlined">upload</span> Restaurar Respaldo
+                    <span class="material-symbols-outlined">upload</span> Restaurar JSON
                 </button>
                 <input type="file" id="import-file" onchange="importData(this)" class="absolute inset-0 opacity-0 cursor-pointer">
             </div>
@@ -576,7 +581,7 @@
         window.addEventListener('DOMContentLoaded', () => {
             initApp();
             
-            // PULL TO REFRESH LOGIC
+            // PULL TO REFRESH LOGIC (REFINED)
             document.addEventListener('touchstart', e => {
                 if (window.scrollY === 0) touchStartY = e.touches[0].clientY;
             }, {passive: true});
@@ -584,8 +589,8 @@
             document.addEventListener('touchmove', e => {
                 const touchY = e.touches[0].clientY;
                 if (touchStartY > 0 && touchY > touchStartY && window.scrollY === 0) {
-                    pullDistance = (touchY - touchStartY) * 0.5; // Resistance
-                    if (pullDistance > 100) pullDistance = 100; // Max pull
+                    pullDistance = (touchY - touchStartY) * 0.5; 
+                    if (pullDistance > 100) pullDistance = 100;
                     if (pullDistance > 0) {
                         spinner.style.transform = `translateX(-50%) scale(${Math.min(pullDistance/50, 1)}) translateY(${pullDistance}px)`;
                         if (pullDistance > 60) spinner.classList.add('ptr-loading');
@@ -607,12 +612,13 @@
 
         function initApp() {
             loadData();
+            // INIT FILTERS
             setFilter('dashboard', '1M', 'Este Mes'); 
             setFilter('history', 'ALL', 'Todo');
             switchView('dashboard');
         }
 
-        // --- FUNCIONES CORE ---
+        // --- CORE FUNCTIONS ---
         function showCustomConfirm(text, callback) {
             document.getElementById('confirm-text').innerText = text;
             confirmCallback = callback;
@@ -753,6 +759,7 @@
             
             document.getElementById('dash-efficiency-val').innerText = avgEff.toFixed(1);
             
+            // GAUGE CALCULATION (15 BASE)
             const percentage = Math.min((avgEff / 15) * 100, 100); 
             document.getElementById('efficiency-circle').setAttribute('stroke-dasharray', `${percentage}, 100`);
 
@@ -777,11 +784,10 @@
             if (filteredHistory.length === 0) {
                 listEl.innerHTML = '<p class="text-center text-gray-500 py-4 text-xs">No hay registros en este periodo.</p>';
             } else {
-                let html = '';
                 filteredHistory.slice(0, 3).forEach(item => {
-                    html += createDashboardListItem(item);
+                    const listItem = createDashboardListItem(item);
+                    listEl.appendChild(listItem);
                 });
-                listEl.innerHTML = html;
             }
         }
 
@@ -790,9 +796,10 @@
             const dateStr = `${parts[2]}/${parts[1]}`; 
             const typeColor = item.type === 'Premium' ? 'text-red-500' : 'text-primary';
 
-            // ATENCIÓN: El onclick debe estar en el div padre
-            return `
-            <div onclick="openDetailsModal(${item.id})" class="flex items-center gap-4 bg-card-dark p-3 rounded-xl shadow-sm border border-white/5 active:scale-95 transition-transform cursor-pointer">
+            const div = document.createElement('div');
+            div.className = "flex items-center gap-4 bg-card-dark p-3 rounded-xl shadow-sm border border-white/5 active:scale-95 transition-transform cursor-pointer";
+            div.onclick = () => openDetailsModal(item.id);
+            div.innerHTML = `
                 <div class="flex items-center justify-center rounded-xl bg-[#2A3830] shrink-0 size-10 ${typeColor}">
                     <span class="material-symbols-outlined text-[20px]">local_gas_station</span>
                 </div>
@@ -805,8 +812,8 @@
                         <p class="text-gray-400 text-xs font-medium truncate">${dateStr} • ${item.volume}L</p>
                         <p class="text-primary text-xs font-bold">${item.kmPerL > 0 ? item.kmPerL.toFixed(1) + ' km/l' : '--'}</p>
                     </div>
-                </div>
-            </div>`;
+                </div>`;
+            return div;
         }
 
         function renderHistory() {
@@ -826,17 +833,29 @@
             const groups = {};
             filtered.forEach(item => {
                 const parts = item.date.split('-');
-                const dateObj = new Date(parts[0], parts[1]-1, parts[2]); 
-                const key = dateObj.toLocaleString('es-MX', { month: 'long', year: 'numeric' });
-                if (!groups[key]) groups[key] = [];
-                groups[key].push(item);
+                const key = `${parts[1]}/${parts[0]}`; // MM/YYYY grouping key or label
+                // Better label logic
+                const dateObj = new Date(parts[0], parts[1]-1, parts[2]);
+                const niceKey = dateObj.toLocaleString('es-MX', { month: 'long', year: 'numeric' });
+                
+                if (!groups[niceKey]) groups[niceKey] = [];
+                groups[niceKey].push(item);
             });
 
             for (const [month, items] of Object.entries(groups)) {
-                let html = `<div class="mb-2"><h3 class="text-gray-500 text-[10px] font-bold uppercase tracking-wider mb-2 sticky top-0 bg-background-dark py-2 z-10">${month}</h3><div class="flex flex-col gap-2">`;
-                items.forEach(item => html += createHistoryListItem(item, fullHistory));
-                html += `</div></div>`;
-                container.innerHTML += html;
+                const header = document.createElement('div');
+                header.className = "mb-2";
+                header.innerHTML = `<h3 class="text-gray-500 text-[10px] font-bold uppercase tracking-wider mb-2 sticky top-0 bg-background-dark py-2 z-10">${month}</h3>`;
+                
+                const list = document.createElement('div');
+                list.className = "flex flex-col gap-2";
+                
+                items.forEach(item => {
+                    list.appendChild(createHistoryListItem(item, fullHistory));
+                });
+                
+                header.appendChild(list);
+                container.appendChild(header);
             }
         }
 
@@ -853,8 +872,10 @@
                 else if (item.kmPerL < prevItem.kmPerL - 0.1) { trendIcon = 'trending_down'; trendColor = 'text-orange-400'; }
             } else if (!prevItem) { trendIcon = 'fiber_manual_record'; trendColor = 'text-gray-600'; }
 
-            return `
-            <div onclick="openDetailsModal(${item.id})" class="bg-card-dark p-3 rounded-2xl border border-white/5 active:scale-[0.98] transition-transform cursor-pointer shadow-sm">
+            const div = document.createElement('div');
+            div.className = "bg-card-dark p-3 rounded-2xl border border-white/5 active:scale-[0.98] transition-transform cursor-pointer shadow-sm";
+            div.onclick = () => openDetailsModal(item.id);
+            div.innerHTML = `
                 <div class="flex justify-between items-start mb-2">
                     <div class="flex gap-3">
                         <div class="flex items-center justify-center rounded-xl bg-[#2A3830] shrink-0 size-10 ${typeColor}">
@@ -879,8 +900,8 @@
                         <span class="material-symbols-outlined text-xs">attach_money</span>
                         <span class="text-[10px] font-medium">$${item.pricePerL.toFixed(2)}/L</span>
                     </div>
-                </div>
-            </div>`;
+                </div>`;
+            return div;
         }
 
         function renderStats() {
@@ -1105,6 +1126,25 @@
             node.setAttribute("download", "fuel_backup.json"); document.body.appendChild(node);
             node.click(); node.remove();
         }
+
+        // --- CSV EXPORT ---
+        function exportCSV() {
+            if (appData.refills.length === 0) { showToast("No hay datos para exportar", "error"); return; }
+            let csv = "Fecha,Odometro,Litros,Costo,Precio/L,Gasolinera,Tipo,Notas\n";
+            appData.refills.forEach(r => {
+                const price = (r.cost / r.volume).toFixed(2);
+                csv += `${r.date},${r.odometer},${r.volume},${r.cost},${price},"${r.location}",${r.type},"${r.notes || ''}"\n`;
+            });
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement("a");
+            const url = URL.createObjectURL(blob);
+            link.setAttribute("href", url);
+            link.setAttribute("download", "fuel_data.csv");
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
         function importData(input) {
             const file = input.files[0]; if (!file) return;
             const reader = new FileReader();
