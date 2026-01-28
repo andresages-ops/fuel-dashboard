@@ -36,28 +36,47 @@
     </script>
 
     <style>
-        body { min-height: 100dvh; }
+        body { overscroll-behavior-y: none; } /* Prevenir rebote en móviles */
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
         
         /* Animación para el cambio de vistas */
-        .view-section { display: none; animation: fadeIn 0.3s ease-in-out; }
-        .view-section.active { display: flex; flex-direction: column; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .view-section { 
+            display: none; 
+            min-height: 100vh;
+            width: 100%;
+            padding-bottom: 120px; /* Espacio para el menú inferior */
+        }
+        .view-section.active { 
+            display: flex; 
+            flex-direction: column; 
+            animation: fadeIn 0.3s ease-in-out; 
+        }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         
         /* Estilos del Gauge Circular */
         .circular-chart { display: block; margin: 0 auto; max-width: 100%; max-height: 250px; }
         .circle-bg { fill: none; stroke: #2A3830; }
         .circle { fill: none; stroke-width: 2.8; stroke-linecap: round; transition: stroke-dasharray 1s ease-out; }
+
+        /* Segmented Control Styles */
+        .segmented-control input:checked + label {
+            background-color: #19e65e;
+            color: #000;
+            font-weight: 700;
+        }
     </style>
 </head>
 
-<body class="bg-background-light dark:bg-background-dark font-display text-slate-900 dark:text-white transition-colors duration-200 min-h-screen relative overflow-hidden">
+<body class="bg-background-light dark:bg-background-dark font-display text-slate-900 dark:text-white transition-colors duration-200 min-h-screen relative">
 
-    <div id="view-dashboard" class="view-section active h-full overflow-y-auto pb-32">
+    <div id="view-dashboard" class="view-section active">
         <header class="sticky top-0 z-30 flex items-center justify-between px-4 py-4 bg-background-dark/95 backdrop-blur-md border-b border-white/5">
             <div class="w-10"></div>
-            <h1 class="text-lg font-bold tracking-tight text-center flex-1">Fuel Dashboard</h1>
+            <div class="flex items-center gap-2">
+                <h1 class="text-lg font-bold tracking-tight text-center">Fuel Dashboard</h1>
+                <span id="version-label" class="text-[10px] font-bold bg-primary/20 text-primary px-1.5 py-0.5 rounded border border-primary/20">v1.1</span>
+            </div>
             <div class="w-10 flex justify-end">
                 <button onclick="switchView('settings')" class="p-2 rounded-full hover:bg-white/10 transition-colors">
                     <span class="material-symbols-outlined text-[24px]">settings</span>
@@ -131,15 +150,15 @@
         </div>
     </div>
 
-    <div id="view-history" class="view-section h-full overflow-y-auto pb-32">
-        <header class="sticky top-0 z-50 flex items-center justify-between p-4 bg-background-dark/95 backdrop-blur-md border-b border-gray-800/50">
+    <div id="view-history" class="view-section">
+        <header class="sticky top-0 z-20 flex items-center justify-between p-4 bg-background-dark/95 backdrop-blur-md border-b border-gray-800/50">
             <h1 class="text-xl font-bold">Historial</h1>
         </header>
-        <div id="history-container" class="flex-1 pb-24 px-4 pt-4 flex flex-col gap-4">
+        <div id="history-container" class="flex-1 px-4 pt-4 flex flex-col gap-4">
             </div>
     </div>
 
-    <div id="view-stats" class="view-section h-full overflow-y-auto pb-32">
+    <div id="view-stats" class="view-section">
         <header class="sticky top-0 z-20 flex items-center justify-between bg-background-dark/90 px-4 py-4 backdrop-blur-md">
             <h2 class="text-xl font-bold pl-2">Estadísticas</h2>
         </header>
@@ -176,9 +195,9 @@
         </div>
     </div>
 
-    <div id="view-settings" class="view-section h-full overflow-y-auto pb-32">
-        <header class="flex items-center px-4 py-4 bg-background-dark border-b border-gray-800">
-            <button onclick="switchView('dashboard')" class="mr-4"><span class="material-symbols-outlined">arrow_back</span></button>
+    <div id="view-settings" class="view-section">
+        <header class="sticky top-0 z-20 flex items-center px-4 py-4 bg-background-dark border-b border-gray-800">
+            <button onclick="goBack()" class="mr-4"><span class="material-symbols-outlined">arrow_back</span></button>
             <h1 class="text-xl font-bold">Configuración</h1>
         </header>
         <main class="p-5 flex flex-col gap-6">
@@ -197,9 +216,9 @@
 
             <hr class="border-gray-800 my-2">
 
-            <h3 class="text-lg font-bold text-white">Respaldos</h3>
+            <h3 class="text-lg font-bold text-white">Gestión de Datos</h3>
             <button onclick="exportData()" class="flex items-center justify-center gap-2 bg-gray-700 text-white font-bold py-3 rounded-xl">
-                <span class="material-symbols-outlined">download</span> Descargar Respaldo (JSON)
+                <span class="material-symbols-outlined">download</span> Exportar Respaldo (JSON)
             </button>
             
             <div class="relative">
@@ -208,17 +227,25 @@
                 </button>
                 <input type="file" id="import-file" onchange="importData(this)" class="absolute inset-0 opacity-0 cursor-pointer">
             </div>
+
+            <hr class="border-gray-800 my-2">
+
+            <button onclick="deleteAllData()" class="flex items-center justify-center gap-2 bg-red-900/30 text-red-500 border border-red-900 font-bold py-3 rounded-xl mt-2">
+                <span class="material-symbols-outlined">delete_forever</span> Borrar Todo
+            </button>
+            <p class="text-xs text-center text-gray-600">Esto eliminará todos los registros y configuraciones.</p>
+
         </main>
     </div>
 
     <div id="modal-add" class="fixed inset-0 z-[60] bg-background-dark transform translate-y-full transition-transform duration-300 flex flex-col">
         <header class="flex items-center justify-between px-4 py-4 pt-8 bg-background-dark border-b border-gray-800">
-            <button onclick="closeAddModal()" class="text-primary text-base font-medium">Cancelar</button>
+            <button onclick="goBack()" class="text-primary text-base font-medium">Cancelar</button>
             <h1 class="text-lg font-bold tracking-tight">Agregar Carga</h1>
             <div class="w-10"></div>
         </header>
 
-        <main class="flex-1 flex flex-col gap-6 p-5 overflow-y-auto no-scrollbar pb-32">
+        <main class="flex-1 flex flex-col gap-6 p-5 overflow-y-auto pb-32">
             <div class="flex items-center gap-3 bg-surface-dark p-4 rounded-xl border border-gray-800">
                 <div class="flex items-center justify-center size-10 rounded-full bg-primary/10 text-primary">
                     <span class="material-symbols-outlined text-2xl">calendar_today</span>
@@ -234,6 +261,20 @@
                 <div class="relative group">
                     <input id="input-odo" class="w-full bg-surface-dark border-2 border-transparent focus:border-primary rounded-xl px-4 py-6 text-4xl font-extrabold outline-none text-white transition-all shadow-sm ring-0 focus:ring-0" placeholder="0" type="number"/>
                     <span class="absolute right-6 top-1/2 -translate-y-1/2 text-lg font-bold text-gray-500 pointer-events-none">km</span>
+                </div>
+            </section>
+
+             <section class="flex flex-col gap-2">
+                <label class="text-xs font-bold text-gray-400 uppercase tracking-wider ml-1">Tipo de Combustible</label>
+                <div class="segmented-control flex p-1 bg-surface-dark rounded-xl border border-gray-800">
+                    <div class="flex-1">
+                        <input type="radio" name="fuelType" id="type-regular" value="Regular" class="hidden" checked>
+                        <label for="type-regular" class="flex items-center justify-center w-full py-3 rounded-lg text-gray-400 font-semibold cursor-pointer transition-all">Regular</label>
+                    </div>
+                    <div class="flex-1">
+                        <input type="radio" name="fuelType" id="type-premium" value="Premium" class="hidden">
+                        <label for="type-premium" class="flex items-center justify-center w-full py-3 rounded-lg text-gray-400 font-semibold cursor-pointer transition-all">Premium</label>
+                    </div>
                 </div>
             </section>
 
@@ -254,12 +295,17 @@
                 </section>
             </div>
 
-            <section class="flex flex-col gap-2 pt-2">
+            <section class="flex flex-col gap-2">
                 <label class="text-xs font-bold text-gray-400 uppercase tracking-wider ml-1">Gasolinera</label>
                 <div class="relative flex items-center w-full bg-surface-dark rounded-xl shadow-sm border-2 border-transparent focus-within:border-primary transition-all">
                     <div class="pl-4 text-gray-500"><span class="material-symbols-outlined">pin_drop</span></div>
                     <input id="input-loc" class="w-full bg-transparent border-none rounded-xl px-3 py-4 text-lg font-medium outline-none text-white ring-0 focus:ring-0" placeholder="Nombre del lugar" type="text"/>
                 </div>
+            </section>
+
+             <section class="flex flex-col gap-2">
+                <label class="text-xs font-bold text-gray-400 uppercase tracking-wider ml-1">Notas</label>
+                <textarea id="input-notes" class="w-full bg-surface-dark border-2 border-transparent focus:border-primary rounded-xl px-4 py-3 text-white outline-none ring-0 focus:ring-0 resize-none h-24" placeholder="Observaciones adicionales..."></textarea>
             </section>
         </main>
 
@@ -267,6 +313,52 @@
             <button onclick="saveRefill()" class="w-full bg-primary hover:bg-green-400 active:scale-[0.98] transition-all text-background-dark font-display font-bold text-lg py-4 rounded-xl shadow-lg flex items-center justify-center gap-2">
                 <span class="material-symbols-outlined">check</span> Guardar
             </button>
+        </div>
+    </div>
+
+    <div id="modal-details" class="fixed inset-0 z-[70] bg-black/80 backdrop-blur-sm hidden items-center justify-center p-4 transition-opacity duration-300">
+        <div class="bg-card-dark w-full max-w-md rounded-2xl border border-gray-700 shadow-2xl overflow-hidden transform scale-95 transition-transform duration-200" id="modal-details-card">
+            <div class="bg-surface-dark p-4 border-b border-gray-800 flex justify-between items-center">
+                <h2 class="text-lg font-bold text-white">Detalles de Carga</h2>
+                <button onclick="closeDetailsModal()" class="text-gray-400 hover:text-white"><span class="material-symbols-outlined">close</span></button>
+            </div>
+            <div class="p-6 flex flex-col gap-4">
+                <div class="flex justify-between items-start">
+                    <div>
+                        <p id="detail-date" class="text-gray-400 text-sm font-semibold mb-1">--</p>
+                        <h3 id="detail-location" class="text-2xl font-bold text-white leading-tight">--</h3>
+                        <span id="detail-type" class="inline-block mt-2 px-2 py-0.5 rounded text-xs font-bold bg-gray-700 text-gray-300">Regular</span>
+                    </div>
+                    <div class="text-right">
+                        <p id="detail-cost" class="text-2xl font-bold text-primary">--</p>
+                        <p id="detail-volume" class="text-sm text-gray-400">--</p>
+                    </div>
+                </div>
+                
+                <hr class="border-gray-800">
+                
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <p class="text-xs text-gray-500 uppercase font-bold">Odómetro</p>
+                        <p id="detail-odo" class="text-lg font-semibold text-white">-- km</p>
+                    </div>
+                    <div>
+                        <p class="text-xs text-gray-500 uppercase font-bold">Rendimiento</p>
+                        <p id="detail-eff" class="text-lg font-semibold text-white">--</p>
+                    </div>
+                    <div>
+                        <p class="text-xs text-gray-500 uppercase font-bold">Precio/Litro</p>
+                        <p id="detail-price" class="text-lg font-semibold text-white">--</p>
+                    </div>
+                </div>
+
+                <div id="detail-notes-container" class="mt-2 p-3 bg-surface-dark rounded-lg border border-gray-800">
+                    <p class="text-xs text-gray-500 uppercase font-bold mb-1">Notas</p>
+                    <p id="detail-notes" class="text-sm text-gray-300 italic">--</p>
+                </div>
+
+                <button onclick="closeDetailsModal()" class="w-full mt-4 py-3 bg-gray-800 hover:bg-gray-700 rounded-xl font-bold text-white">Cerrar</button>
+            </div>
         </div>
     </div>
 
@@ -294,29 +386,62 @@
                 initialOdometer: 0,
                 nextServiceKm: 0
             },
-            refills: [] // { id, date, odometer, volume, cost, location, pricePerL, kmPerL }
+            refills: [] // { id, date, odometer, volume, cost, location, type, notes }
         };
 
-        const STORAGE_KEY = 'fuel_app_db';
+        const STORAGE_KEY = 'fuel_app_db_v1';
         let efficiencyChartInstance = null;
 
         // --- INICIALIZACIÓN ---
         window.addEventListener('DOMContentLoaded', () => {
             loadData();
             
+            // Reemplazamos el estado inicial del historial para controlar el botón "Atrás"
+            history.replaceState({view: 'dashboard'}, 'Dashboard', '');
+
             // Si es la primera vez, sugerir configuración
             if (appData.refills.length === 0 && appData.settings.initialOdometer === 0) {
-                alert("Bienvenido. Por favor ingresa el Odómetro Inicial en Configuración para comenzar a calcular correctamente.");
-                switchView('settings');
-            } else {
-                renderDashboard();
+                // No forzamos alerta, solo dejamos que el usuario explore, pero marcamos el dashboard
             }
+            
+            renderDashboard();
 
             // Setear fecha actual en modal
             const now = new Date();
             now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
             document.getElementById('input-date').value = now.toISOString().slice(0,16);
         });
+
+        // --- MANEJO DEL BOTÓN ATRÁS (HISTORY API) ---
+        window.addEventListener('popstate', (event) => {
+            const state = event.state;
+            
+            // Si hay un modal abierto, lo cerramos
+            const addModal = document.getElementById('modal-add');
+            const detailsModal = document.getElementById('modal-details');
+            
+            if (!addModal.classList.contains('translate-y-full')) {
+                addModal.classList.add('translate-y-full');
+                return;
+            }
+            if (!detailsModal.classList.contains('hidden')) {
+                detailsModal.classList.add('hidden');
+                detailsModal.classList.remove('flex');
+                return;
+            }
+
+            // Navegación entre vistas
+            if (state && state.view) {
+                showViewUI(state.view);
+            } else {
+                // Fallback a dashboard si no hay estado
+                showViewUI('dashboard');
+            }
+        });
+
+        function goBack() {
+            window.history.back();
+        }
 
         // --- GESTIÓN DE DATOS ---
         function loadData() {
@@ -328,7 +453,18 @@
 
         function saveData() {
             localStorage.setItem(STORAGE_KEY, JSON.stringify(appData));
-            renderDashboard(); // Actualizar UI
+            renderDashboard(); 
+        }
+
+        function deleteAllData() {
+            if(confirm("¿Estás SEGURO de que quieres borrar todos los datos? Esta acción no se puede deshacer.")) {
+                if(confirm("Confirmación final: Se borrará todo el historial.")) {
+                    localStorage.removeItem(STORAGE_KEY);
+                    appData = { settings: { initialOdometer: 0, nextServiceKm: 0 }, refills: [] };
+                    alert("Datos eliminados. La aplicación se reiniciará.");
+                    location.reload();
+                }
+            }
         }
 
         function saveSettings() {
@@ -340,7 +476,7 @@
             
             saveData();
             alert("Configuración guardada");
-            switchView('dashboard');
+            window.history.back(); // Regresar
         }
 
         // --- LÓGICA DE NEGOCIO (CÁLCULOS) ---
@@ -361,41 +497,39 @@
         }
 
         function getFullHistoryCalculated() {
-            // Ordenar por fecha (más antiguo primero para calcular)
             const sorted = [...appData.refills].sort((a, b) => new Date(a.date) - new Date(b.date));
             let prevOdo = appData.settings.initialOdometer;
             
             return sorted.map(r => {
                 const stats = calculateStats(r, prevOdo);
-                prevOdo = r.odometer; // Actualizar odómetro previo para el siguiente
+                prevOdo = r.odometer; 
                 return { ...r, ...stats };
-            }).reverse(); // Regresar más reciente primero para UI
+            }).reverse(); 
         }
 
         // --- UI: DASHBOARD ---
         function renderDashboard() {
-            const history = getFullHistoryCalculated();
+            const historyList = getFullHistoryCalculated();
             
-            // 1. Gauge Efficiency (Promedio de las ultimas 5 o total)
-            const validEfficiencies = history.filter(h => h.kmPerL > 0);
+            // 1. Gauge Efficiency
+            const validEfficiencies = historyList.filter(h => h.kmPerL > 0);
             const avgEff = validEfficiencies.length ? (validEfficiencies.reduce((acc, curr) => acc + curr.kmPerL, 0) / validEfficiencies.length) : 0;
             
             document.getElementById('dash-efficiency-val').innerText = avgEff.toFixed(1);
-            // Animar círculo (0 a 100 dasharray. 30km/l = 100%, adjust as needed)
             const percentage = Math.min((avgEff / 25) * 100, 100); 
             document.getElementById('efficiency-circle').setAttribute('stroke-dasharray', `${percentage}, 100`);
 
             // 2. Totals
-            const totalSpent = history.reduce((acc, curr) => acc + curr.cost, 0);
+            const totalSpent = historyList.reduce((acc, curr) => acc + curr.cost, 0);
             document.getElementById('dash-total-spent').innerText = `$${totalSpent.toLocaleString()}`;
 
             // 3. Last Refill Price
-            if (history.length > 0) {
-                document.getElementById('dash-last-price').innerText = history[0].pricePerL.toFixed(2);
+            if (historyList.length > 0) {
+                document.getElementById('dash-last-price').innerText = historyList[0].pricePerL.toFixed(2);
             }
 
-            // 4. Maintenance Warning
-            const currentOdo = history.length > 0 ? history[0].odometer : appData.settings.initialOdometer;
+            // 4. Maintenance
+            const currentOdo = historyList.length > 0 ? historyList[0].odometer : appData.settings.initialOdometer;
             const alertEl = document.getElementById('maintenance-alert');
             if (appData.settings.nextServiceKm > 0 && currentOdo >= appData.settings.nextServiceKm) {
                 alertEl.classList.remove('hidden');
@@ -407,7 +541,7 @@
             // 5. Recent List
             const listEl = document.getElementById('dash-recent-list');
             listEl.innerHTML = '';
-            history.slice(0, 3).forEach(item => {
+            historyList.slice(0, 3).forEach(item => {
                 listEl.innerHTML += createListItem(item);
             });
         }
@@ -416,9 +550,12 @@
             const dateObj = new Date(item.date);
             const dateStr = dateObj.toLocaleDateString('es-MX', { month: 'short', day: 'numeric' });
             
+            // Color tag based on type
+            const typeColor = item.type === 'Premium' ? 'text-red-400' : 'text-primary';
+
             return `
-            <div class="flex items-center gap-4 bg-card-dark p-4 rounded-xl shadow-sm border border-white/5">
-                <div class="flex items-center justify-center rounded-xl bg-[#2A3830] shrink-0 size-12 text-white">
+            <div onclick="openDetailsModal(${item.id})" class="flex items-center gap-4 bg-card-dark p-4 rounded-xl shadow-sm border border-white/5 active:scale-95 transition-transform cursor-pointer">
+                <div class="flex items-center justify-center rounded-xl bg-[#2A3830] shrink-0 size-12 ${typeColor}">
                     <span class="material-symbols-outlined text-[24px]">local_gas_station</span>
                 </div>
                 <div class="flex flex-col flex-1 min-w-0">
@@ -427,7 +564,7 @@
                         <p class="text-white text-base font-bold">$${item.cost}</p>
                     </div>
                     <div class="flex justify-between items-center mt-1">
-                        <p class="text-gray-400 text-sm font-medium truncate">${dateStr} • ${item.volume}L</p>
+                        <p class="text-gray-400 text-sm font-medium truncate">${dateStr} • ${item.volume}L <span class="text-xs opacity-50 ml-1 border border-gray-600 rounded px-1">${item.type || 'Reg'}</span></p>
                         <p class="text-primary text-xs font-bold">${item.kmPerL > 0 ? item.kmPerL.toFixed(1) + ' km/l' : '--'}</p>
                     </div>
                 </div>
@@ -436,13 +573,12 @@
 
         // --- UI: HISTORIAL ---
         function renderHistory() {
-            const history = getFullHistoryCalculated();
+            const historyList = getFullHistoryCalculated();
             const container = document.getElementById('history-container');
             container.innerHTML = '';
             
-            // Agrupar por mes
             const groups = {};
-            history.forEach(item => {
+            historyList.forEach(item => {
                 const date = new Date(item.date);
                 const key = date.toLocaleString('es-MX', { month: 'long', year: 'numeric' });
                 if (!groups[key]) groups[key] = [];
@@ -450,7 +586,7 @@
             });
 
             for (const [month, items] of Object.entries(groups)) {
-                let html = `<div class="mb-2"><h3 class="text-gray-500 text-sm font-bold uppercase tracking-wider mb-2 sticky top-0 bg-background-dark py-2">${month}</h3><div class="flex flex-col gap-3">`;
+                let html = `<div class="mb-2"><h3 class="text-gray-500 text-sm font-bold uppercase tracking-wider mb-2 sticky top-0 bg-background-dark py-2 z-10">${month}</h3><div class="flex flex-col gap-3">`;
                 items.forEach(item => {
                     html += createListItem(item);
                 });
@@ -459,14 +595,13 @@
             }
         }
 
-        // --- UI: ESTADÍSTICAS (Chart.js) ---
+        // --- UI: ESTADÍSTICAS ---
         function renderStats() {
-            const history = getFullHistoryCalculated().reverse(); // Orden cronológico para gráfica
-            const valid = history.filter(h => h.kmPerL > 0);
+            const historyList = getFullHistoryCalculated().reverse();
+            const valid = historyList.filter(h => h.kmPerL > 0);
             
             if (valid.length === 0) return;
 
-            // Stats cards
             const max = Math.max(...valid.map(h => h.kmPerL));
             const min = Math.min(...valid.map(h => h.kmPerL));
             const avg = valid.reduce((a,b)=>a+b.kmPerL,0) / valid.length;
@@ -475,12 +610,10 @@
             document.getElementById('stats-worst').innerText = min.toFixed(1) + ' km/l';
             document.getElementById('stats-avg-eff').innerHTML = `${avg.toFixed(1)} <span class="text-lg font-semibold text-slate-400">km/l</span>`;
 
-            // Render Chart
             const ctx = document.getElementById('efficiencyChart').getContext('2d');
             
             if (efficiencyChartInstance) efficiencyChartInstance.destroy();
 
-            // Gradiente verde
             const gradient = ctx.createLinearGradient(0, 0, 0, 400);
             gradient.addColorStop(0, 'rgba(25, 230, 94, 0.5)');
             gradient.addColorStop(1, 'rgba(25, 230, 94, 0.0)');
@@ -498,7 +631,7 @@
                         pointBackgroundColor: '#112116',
                         pointBorderColor: '#19e65e',
                         pointBorderWidth: 2,
-                        tension: 0.4, // Curva suave tipo spline
+                        tension: 0.4,
                         fill: true
                     }]
                 },
@@ -516,6 +649,12 @@
 
         // --- UI: ACCIONES Y NAVEGACIÓN ---
         function switchView(viewName) {
+            // Push state al historial para que el botón Back funcione
+            history.pushState({view: viewName}, viewName, '');
+            showViewUI(viewName);
+        }
+
+        function showViewUI(viewName) {
             // Ocultar todas
             document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
             document.querySelectorAll('.nav-btn').forEach(el => el.classList.remove('text-primary'));
@@ -523,7 +662,7 @@
             // Mostrar seleccionada
             document.getElementById(`view-${viewName}`).classList.add('active');
             
-            // Renderizar contenido específico
+            // Renderizar contenido
             if (viewName === 'dashboard') renderDashboard();
             if (viewName === 'history') renderHistory();
             if (viewName === 'stats') renderStats();
@@ -532,16 +671,21 @@
                 document.getElementById('setting-service-odo').value = appData.settings.nextServiceKm;
             }
 
-            // Actualizar Nav Activo
+            // Navbar
             const navIndex = viewName === 'dashboard' ? 0 : viewName === 'history' ? 1 : viewName === 'stats' ? 2 : -1;
             if (navIndex >= 0) {
                 document.querySelectorAll('.nav-btn')[navIndex].classList.add('text-primary');
             }
+            
+            // Scroll to top
+            window.scrollTo(0,0);
         }
 
         function openAddModal() {
+            // Push state para que "Back" cierre el modal
+            history.pushState({modal: 'add'}, 'Add Refill', '');
             document.getElementById('modal-add').classList.remove('translate-y-full');
-            // Pre-llenar odómetro sugerido (último + 1)
+            
             const lastOdo = appData.refills.length > 0 
                 ? Math.max(...appData.refills.map(r => r.odometer)) 
                 : appData.settings.initialOdometer;
@@ -549,10 +693,54 @@
         }
 
         function closeAddModal() {
-            document.getElementById('modal-add').classList.add('translate-y-full');
-            // Limpiar campos
-            document.getElementById('input-vol').value = '';
-            document.getElementById('input-cost').value = '';
+            // Si venimos del botón cancelar, debemos hacer back al historial para quitar el estado del modal
+            // Pero si venimos del evento popstate (botón físico back), no hacemos back otra vez.
+            // Para simplificar, este botón llamará a history.back()
+            window.history.back();
+        }
+
+        function openDetailsModal(id) {
+            const historyList = getFullHistoryCalculated();
+            const item = historyList.find(r => r.id === id);
+            if(!item) return;
+
+            // Push state
+            history.pushState({modal: 'details'}, 'Details', '');
+
+            // Populate Info
+            document.getElementById('detail-location').innerText = item.location || 'Ubicación no registrada';
+            const dateObj = new Date(item.date);
+            document.getElementById('detail-date').innerText = dateObj.toLocaleDateString('es-MX', {weekday:'long', year:'numeric', month:'long', day:'numeric'}) + ' ' + dateObj.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+            
+            document.getElementById('detail-cost').innerText = `$${item.cost}`;
+            document.getElementById('detail-volume').innerText = `${item.volume} L`;
+            document.getElementById('detail-odo').innerText = `${item.odometer} km`;
+            document.getElementById('detail-eff').innerText = item.kmPerL > 0 ? `${item.kmPerL.toFixed(2)} km/l` : 'N/A';
+            document.getElementById('detail-price').innerText = `$${item.pricePerL.toFixed(2)}`;
+
+            // Type
+            const typeEl = document.getElementById('detail-type');
+            typeEl.innerText = item.type || 'Regular';
+            typeEl.className = `inline-block mt-2 px-2 py-0.5 rounded text-xs font-bold ${item.type === 'Premium' ? 'bg-red-900 text-red-300' : 'bg-green-900 text-green-300'}`;
+
+            // Notes
+            const noteEl = document.getElementById('detail-notes');
+            const noteContainer = document.getElementById('detail-notes-container');
+            if (item.notes && item.notes.trim() !== '') {
+                noteEl.innerText = item.notes;
+                noteContainer.classList.remove('hidden');
+            } else {
+                noteContainer.classList.add('hidden');
+            }
+
+            // Show UI
+            const modal = document.getElementById('modal-details');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        }
+
+        function closeDetailsModal() {
+            window.history.back();
         }
 
         function saveRefill() {
@@ -561,9 +749,11 @@
             const vol = parseFloat(document.getElementById('input-vol').value);
             const cost = parseFloat(document.getElementById('input-cost').value);
             const loc = document.getElementById('input-loc').value;
+            const type = document.querySelector('input[name="fuelType"]:checked').value;
+            const notes = document.getElementById('input-notes').value;
 
             if (!date || isNaN(odo) || isNaN(vol) || isNaN(cost)) {
-                alert("Por favor completa todos los campos numéricos.");
+                alert("Por favor completa los campos numéricos.");
                 return;
             }
 
@@ -573,16 +763,25 @@
                 odometer: odo,
                 volume: vol,
                 cost: cost,
-                location: loc
+                location: loc,
+                type: type,
+                notes: notes
             };
 
             appData.refills.push(newRefill);
             saveData();
-            closeAddModal();
-            alert("Carga guardada exitosamente");
+            
+            // Cerrar modal correctamente limpiando campos
+            document.getElementById('input-vol').value = '';
+            document.getElementById('input-cost').value = '';
+            document.getElementById('input-notes').value = '';
+            window.history.back(); // Cerrar modal via history
+            
+            // Pequeño delay para alerta
+            setTimeout(() => alert("Carga guardada"), 100);
         }
 
-        // --- EXPORTAR / IMPORTAR (JSON) ---
+        // --- EXPORTAR / IMPORTAR ---
         function exportData() {
             const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(appData));
             const downloadAnchorNode = document.createElement('a');
@@ -604,7 +803,7 @@
                         appData = json;
                         saveData();
                         alert("Datos restaurados correctamente.");
-                        switchView('dashboard');
+                        location.reload();
                     } else {
                         alert("El archivo no tiene el formato correcto.");
                     }
